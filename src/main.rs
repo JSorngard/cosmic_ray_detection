@@ -21,7 +21,7 @@ fn main() -> Result<(), String> {
         print!("Allocating {} bits of detector RAM... ", size);
         io::stdout().flush().unwrap();
     }
-    let mut detector_mass: Vec<u64> = vec![0; size];
+    let mut detector_mass: Vec<usize> = vec![0; size];
     if verbose {
         println!("done");
     }
