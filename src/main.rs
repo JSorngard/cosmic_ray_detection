@@ -32,7 +32,7 @@ fn main() -> Result<(), String> {
 
     //Instead of building a detector out of scintillators and photo multiplier tubes,
     //we just allocate some memory on this here computer.
-    //Less exciting, but much cheaper
+    //Less exciting, much less accurate and sensitive, but much cheaper
     let mut detector: Vec<u8> = vec![0; size];
     if verbose {
         print!("Initializing detector RAM with random values...");
