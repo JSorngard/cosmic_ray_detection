@@ -5,48 +5,69 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 fn main() {
-    let conf = Config::new();
+    let conf: Config = Config::new();
 
     let size: usize = parse_size_string(conf.memory_to_occupy);
 
-    print!("Allocating {} bits of detector RAM... ", size);
-    io::stdout().flush().unwrap();
-    let detector_mass: Vec<bool> = vec![true; size];
-    println!("done");
+    let verbose: bool = conf.verbose;
 
-    let start = Instant::now();
-    let sleep_duration = Duration::from_millis(conf.check_delay);
-
-    if conf.check_delay == 0 {
-        println!("Will do continuous integrity checks");
-    } else {
-        println!("Waiting {:?} between integrity checks", sleep_duration);
+    if verbose {
+        print!("Allocating {} bits of detector RAM... ", size);
+        io::stdout().flush().unwrap();
     }
-    let mut checks = 1;
-    if conf.parallel {
-        println!("Running checks in parallel");
-        while detector_mass.par_iter().all(|i| *i) {
-            sleep(sleep_duration);
-            print!("\rChecks completed: {}", checks);
-            io::stdout().flush().unwrap();
-            checks += 1;
-        }
-    } else {
-        while detector_mass.iter().all(|i| *i) {
-            sleep(sleep_duration);
-            print!("\rChecks completed: {}", checks);
-            io::stdout().flush().unwrap();
-            checks += 1;
+    let mut detector_mass: Vec<bool> = vec![true; size];
+    if verbose {
+        println!("done");
+    }
+
+    let start: Instant = Instant::now();
+    let sleep_duration: Duration = Duration::from_millis(conf.check_delay);
+
+    if verbose {
+        if conf.check_delay == 0 {
+            println!("Will do continuous integrity checks");
+        } else {
+            println!("Waiting {:?} between integrity checks", sleep_duration);
         }
     }
 
-    println!(
-        "Detected a bitflip after {:?} on integrity check number {}",
-        start.elapsed(),
-        checks
-    );
-    let location = detector_mass.iter().position(|&r| !r).unwrap() + 1;
-    println!("Boolean {} flipped", location);
+    let mut checks: u64 = 1;
+
+    loop {
+        if conf.parallel {
+            if verbose {
+                println!("Running checks in parallel");
+            }
+            
+            while detector_mass.par_iter().all(|i| *i) {
+                sleep(sleep_duration);
+                if verbose {
+                    print!("\rChecks completed: {}", checks);
+                    io::stdout().flush().unwrap();
+                }
+                checks += 1;
+            }
+        } else {
+            while detector_mass.iter().all(|i| *i) {
+                sleep(sleep_duration);
+                if verbose {
+                    print!("\rChecks completed: {}", checks);
+                    io::stdout().flush().unwrap();
+                }
+                checks += 1;
+            }
+        }
+
+        println!(
+            "Detected a bitflip after {:?} on integrity check number {}",
+            start.elapsed(),
+            checks
+        );
+        let location = detector_mass.iter().position(|&r| !r).unwrap() + 1;
+        println!("Boolean {} flipped", location);
+
+        detector_mass[location - 1] = true;
+    }
 }
 
 fn parse_size_string(size_string: String) -> usize {
@@ -54,15 +75,15 @@ fn parse_size_string(size_string: String) -> usize {
         Ok(t) => t,
         Err(_) => {
             let chars: Vec<char> = size_string.chars().collect();
-            let len = chars.len();
+            let len: usize = chars.len();
             //unwrap is okay, because clap doesn't let the program run without input in this variable
-            let last = *chars.last().unwrap();
+            let last: char = *chars.last().unwrap();
             if (last != 'B' && last != 'b') || len < 2 {
                 panic!("memory_to_occupy was incorrectly formatted");
             }
-            let next_to_last = chars[len - 2];
+            let next_to_last: char = chars[len - 2];
 
-            let si_prefix_factor = if next_to_last == 'k' {
+            let si_prefix_factor: f64 = if next_to_last == 'k' {
                 1e3
             } else if next_to_last == 'M' {
                 1e6
@@ -76,12 +97,12 @@ fn parse_size_string(size_string: String) -> usize {
                 panic!("could not parse memory size");
             };
 
-            let bit_size = if last == 'B' { 1.0 } else { 1.0 / 8.0 };
+            let bit_size: f64 = if last == 'B' { 1.0 } else { 1.0 / 8.0 };
 
             //unwrap is okay because si_prefix_factor always fits in an f64
-            let factor: usize = (f64::try_from(si_prefix_factor).unwrap() * bit_size) as usize;
+            let factor: usize = (si_prefix_factor * bit_size) as usize;
 
-            let digits: String = chars[..len - 2].into_iter().collect();
+            let digits: String = chars[..len - 2].iter().collect();
             let number: usize = match digits.parse() {
                 Ok(n) => n,
                 Err(e) => panic!("{}", e),
@@ -96,6 +117,7 @@ struct Config {
     memory_to_occupy: String,
     check_delay: u64,
     parallel: bool,
+    verbose: bool,
 }
 
 impl Config {
@@ -124,9 +146,17 @@ impl Config {
                     .takes_value(false)
                     .required(false),
             )
+            .arg(
+                Arg::with_name("verbose")
+                    .help("whether to print more information about the program state")
+                    .takes_value(false)
+                    .required(false)
+            )
             .get_matches();
 
         let parallel = args.is_present("parallel");
+
+        let verbose = args.is_present("verbose");
 
         let memory_to_occupy = args.value_of("memory_size").unwrap().to_owned();
 
@@ -142,6 +172,7 @@ impl Config {
             memory_to_occupy,
             check_delay,
             parallel,
+            verbose,
         }
     }
 }
