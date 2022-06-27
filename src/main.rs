@@ -87,7 +87,7 @@ fn main() -> Result<(), String> {
 }
 
 fn parse_size_string(size_string: String) -> Result<usize, String> {
-    match size_string.parse() {
+    match size_string.parse::<usize>() {
         Ok(t) => Ok(t),
         Err(_) => {
             let chars: Vec<char> = size_string.chars().collect();
