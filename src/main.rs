@@ -7,46 +7,7 @@ use std::time::{Duration, Instant};
 fn main() {
     let conf = Config::new();
 
-    let size: usize = match conf.memory_to_occupy.parse() {
-        Ok(t) => t,
-        Err(_) => {
-            let chars: Vec<char> = conf.memory_to_occupy.chars().collect();
-            let len = chars.len();
-            //unwrap is okay, because clap doesn't let the program run without input in all the arguments
-            let last = *chars.last().unwrap();
-            if (last != 'B' && last != 'b') || len < 2 {
-                panic!("memory_to_occupy was incorrectly formatted");
-            }
-            let next_to_last = chars[len - 2];
-
-            let si_prefix_factor = if next_to_last == 'k' {
-                1e3
-            } else if next_to_last == 'M' {
-                1e6
-            } else if next_to_last == 'G' {
-                1e9
-            } else if next_to_last == 'T' {
-                1e12
-            } else if !next_to_last.is_digit(10) {
-                panic!("unsupported memory size");
-            } else {
-                panic!("could not parse memory size");
-            };
-
-            let bit_size = if last == 'B' { 1.0 } else { 1.0 / 8.0 };
-
-            //unwrap is okay because SI_prefix_factor always fits in an f64
-            let factor: usize = (f64::try_from(si_prefix_factor).unwrap() * bit_size) as usize;
-
-            let digits: String = chars[..len - 2].into_iter().collect();
-            let number: usize = match digits.parse() {
-                Ok(n) => n,
-                Err(e) => panic!("{}", e),
-            };
-
-            number * factor
-        }
-    };
+    let size: usize = parse_size_string(conf.memory_to_occupy);
 
     print!("Allocating {} bits of detector RAM... ", size);
     io::stdout().flush().unwrap();
@@ -86,6 +47,49 @@ fn main() {
     );
     let location = detector_mass.iter().position(|&r| !r).unwrap() + 1;
     println!("It was the {}:th boolean that flipped", location);
+}
+
+fn parse_size_string(size_string: String) -> usize {
+    match size_string.parse() {
+        Ok(t) => t,
+        Err(_) => {
+            let chars: Vec<char> = size_string.chars().collect();
+            let len = chars.len();
+            //unwrap is okay, because clap doesn't let the program run without input in this variable
+            let last = *chars.last().unwrap();
+            if (last != 'B' && last != 'b') || len < 2 {
+                panic!("memory_to_occupy was incorrectly formatted");
+            }
+            let next_to_last = chars[len - 2];
+
+            let si_prefix_factor = if next_to_last == 'k' {
+                1e3
+            } else if next_to_last == 'M' {
+                1e6
+            } else if next_to_last == 'G' {
+                1e9
+            } else if next_to_last == 'T' {
+                1e12
+            } else if !next_to_last.is_digit(10) {
+                panic!("unsupported memory size");
+            } else {
+                panic!("could not parse memory size");
+            };
+
+            let bit_size = if last == 'B' { 1.0 } else { 1.0 / 8.0 };
+
+            //unwrap is okay because si_prefix_factor always fits in an f64
+            let factor: usize = (f64::try_from(si_prefix_factor).unwrap() * bit_size) as usize;
+
+            let digits: String = chars[..len - 2].into_iter().collect();
+            let number: usize = match digits.parse() {
+                Ok(n) => n,
+                Err(e) => panic!("{}", e),
+            };
+
+            number * factor
+        }
+    }
 }
 
 struct Config {
