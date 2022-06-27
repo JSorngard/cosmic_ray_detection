@@ -49,7 +49,7 @@ fn main() -> Result<(), String> {
             print!("Waiting for first check");
             io::stdout().flush().unwrap();
         }
-        
+
         while everything_is_fine {
             //We're not gonna miss any events by being too slow
             sleep(sleep_duration);
@@ -110,7 +110,11 @@ fn parse_size_string(size_string: String) -> Result<usize, String> {
             } else if next_to_last == 'G' {
                 1e9
             } else if next_to_last == 'T' {
+                //Future proofing...
                 1e12
+            } else if next_to_last == 'P' {
+                //HOW?!
+                1e15
             } else if !next_to_last.is_digit(10) {
                 return Err("unsupported memory size".to_owned());
             } else {
