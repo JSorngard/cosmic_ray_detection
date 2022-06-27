@@ -38,7 +38,7 @@ fn main() {
             if verbose {
                 println!("Running checks in parallel");
             }
-            
+
             while detector_mass.par_iter().all(|i| *i) {
                 sleep(sleep_duration);
                 if verbose {
@@ -150,7 +150,7 @@ impl Config {
                 Arg::with_name("verbose")
                     .help("whether to print more information about the program state")
                     .takes_value(false)
-                    .required(false)
+                    .required(false),
             )
             .get_matches();
 
