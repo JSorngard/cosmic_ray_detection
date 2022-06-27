@@ -35,33 +35,28 @@ fn main() -> Result<(), String> {
         } else {
             println!("Waiting {:?} between integrity checks", sleep_duration);
         }
+
+        if verbose {
+            println!("Running checks in parallel");
+        }
     }
 
     let mut checks: u64 = 1;
+    let mut total = 0;
 
     loop {
-        if conf.parallel {
+        while total == 0 {
+            sleep(sleep_duration);
+            total = if conf.parallel {
+                detector_mass.par_iter().sum()
+            } else {
+                detector_mass.iter().sum()
+            };
             if verbose {
-                println!("Running checks in parallel");
+                print!("\rChecks completed: {}", checks);
+                io::stdout().flush().unwrap();
             }
-
-            while detector_mass.par_iter().all(|i| *i == 0) {
-                sleep(sleep_duration);
-                if verbose {
-                    print!("\rChecks completed: {}", checks);
-                    io::stdout().flush().unwrap();
-                }
-                checks += 1;
-            }
-        } else {
-            while detector_mass.iter().all(|i| *i == 0) {
-                sleep(sleep_duration);
-                if verbose {
-                    print!("\rChecks completed: {}", checks);
-                    io::stdout().flush().unwrap();
-                }
-                checks += 1;
-            }
+            checks += 1;
         }
 
         println!();
