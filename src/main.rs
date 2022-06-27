@@ -46,7 +46,7 @@ fn main() {
         checks
     );
     let location = detector_mass.iter().position(|&r| !r).unwrap() + 1;
-    println!("It was the {}:th boolean that flipped", location);
+    println!("Boolean {} flipped", location);
 }
 
 fn parse_size_string(size_string: String) -> usize {
