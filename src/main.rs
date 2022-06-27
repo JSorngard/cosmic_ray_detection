@@ -101,7 +101,6 @@ fn parse_size_string(size_string: String) -> usize {
 
             let bit_size: f64 = if last == 'B' { 1.0 } else { 1.0 / 8.0 };
 
-            //unwrap is okay because si_prefix_factor always fits in an f64
             let factor: usize = (si_prefix_factor * bit_size) as usize;
 
             let digits: String = chars[..len - 2].iter().collect();
