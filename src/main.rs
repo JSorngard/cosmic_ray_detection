@@ -42,18 +42,21 @@ fn main() -> Result<(), String> {
     }
 
     let mut checks: u64 = 1;
-    let mut total = 0;
-
+    let mut everything_is_fine = true;
+    if verbose {
+        print!("Waiting for first check");
+        io::stdout().flush().unwrap();
+    }
     loop {
-        while total == 0 {
+        while everything_is_fine {
             sleep(sleep_duration);
-            total = if conf.parallel {
-                detector_mass.par_iter().sum()
+            everything_is_fine = if conf.parallel {
+                detector_mass.par_iter().all(|i| *i == 0)
             } else {
-                detector_mass.iter().sum()
+                detector_mass.iter().all(|i| *i == 0)
             };
             if verbose {
-                print!("\rChecks completed: {}", checks);
+                print!("\rIntegrity checks passed: {}", checks);
                 io::stdout().flush().unwrap();
             }
             checks += 1;
@@ -70,6 +73,7 @@ fn main() -> Result<(), String> {
         println!("Bit flip at index {}, it became {}", location, detector_mass[location - 1]);
 
         detector_mass[location - 1] = 0;
+        everything_is_fine = true;
     }
 }
 
@@ -150,9 +154,9 @@ impl Config {
                     .required(false),
             )
             .arg(
-                Arg::with_name("verbose")
-                    .help("whether to print more information about the program state")
-                    .long("verbose")
+                Arg::with_name("quiet")
+                    .help("whether to only print information about eventual detections")
+                    .long("quiet")
                     .takes_value(false)
                     .required(false),
             )
@@ -160,7 +164,7 @@ impl Config {
 
         let parallel = args.is_present("parallel");
 
-        let verbose = args.is_present("verbose");
+        let verbose = !args.is_present("quiet");
 
         //unwrap is okay because this code does not run if the memory_size argument wasn't given
         let memory_to_occupy = args.value_of("memory_size").unwrap().to_owned();
