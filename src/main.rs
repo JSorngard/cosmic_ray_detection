@@ -102,6 +102,8 @@ fn main() -> Result<(), String> {
             start.elapsed(),
             checks
         );
+        //unwrap is okay as long as we assume that bitflips are rare, and thus a double bitflip in the same location should be very rare,
+        //but it is amusing in the context of a program that assumes that stuff will just happen randomly to memory.
         let index = detector.iter().position(|&r| r != 0).unwrap();
         println!("Bit flip in byte {}, it became {}", index, detector[index]);
     }
