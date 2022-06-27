@@ -4,10 +4,16 @@ use std::io::{self, Write};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-fn main() {
-    let conf: Config = Config::new();
+fn main() -> Result<(), String> {
+    let conf: Config = match Config::new() {
+        Ok(c) => c,
+        Err(e) => return Err(e),
+    };
 
-    let size: usize = parse_size_string(conf.memory_to_occupy);
+    let size: usize = match parse_size_string(conf.memory_to_occupy) {
+        Ok(s) => s,
+        Err(e) => return Err(e),
+    };
 
     let verbose: bool = conf.verbose;
 
@@ -72,16 +78,16 @@ fn main() {
     }
 }
 
-fn parse_size_string(size_string: String) -> usize {
+fn parse_size_string(size_string: String) -> Result<usize, String> {
     match size_string.parse() {
-        Ok(t) => t,
+        Ok(t) => Ok(t),
         Err(_) => {
             let chars: Vec<char> = size_string.chars().collect();
             let len: usize = chars.len();
             //unwrap is okay, because clap doesn't let the program run without input in this variable
             let last: char = *chars.last().unwrap();
             if (last != 'B' && last != 'b') || len < 2 {
-                panic!("memory_to_occupy was incorrectly formatted");
+                return Err("memory_to_occupy was incorrectly formatted".to_owned());
             }
             let next_to_last: char = chars[len - 2];
 
@@ -94,9 +100,9 @@ fn parse_size_string(size_string: String) -> usize {
             } else if next_to_last == 'T' {
                 1e12
             } else if !next_to_last.is_digit(10) {
-                panic!("unsupported memory size");
+                return Err("unsupported memory size".to_owned());
             } else {
-                panic!("could not parse memory size");
+                return Err("could not parse memory size".to_owned());
             };
 
             let bit_size: f64 = if last == 'B' { 1.0 } else { 1.0 / 8.0 };
@@ -106,10 +112,10 @@ fn parse_size_string(size_string: String) -> usize {
             let digits: String = chars[..len - 2].iter().collect();
             let number: usize = match digits.parse() {
                 Ok(n) => n,
-                Err(e) => panic!("{}", e),
+                Err(e) => return Err(e.to_string()),
             };
 
-            number * factor
+            Ok(number * factor)
         }
     }
 }
@@ -122,7 +128,7 @@ struct Config {
 }
 
 impl Config {
-    fn new() -> Self {
+    fn new() -> Result<Self, String> {
         let args = Command::new("cosmic ray detector")
             .about("monitors memory for bit-flips (won't work on ECC memory)")
             .version("v0.1.0")
@@ -161,21 +167,22 @@ impl Config {
 
         let verbose = args.is_present("verbose");
 
+        //unwrap is okay because this code does not run if the memory_size argument wasn't given
         let memory_to_occupy = args.value_of("memory_size").unwrap().to_owned();
 
         let check_delay: u64 = match args.value_of("check_delay") {
             Some(s) => match s.parse() {
                 Ok(t) => t,
-                Err(e) => panic!("could not parse check delay: {}", e),
+                Err(e) => return Err(e.to_string()),
             },
             None => 0,
         };
 
-        Config {
+        Ok(Config {
             memory_to_occupy,
             check_delay,
             parallel,
             verbose,
-        }
+        })
     }
 }
