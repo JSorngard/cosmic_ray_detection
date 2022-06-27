@@ -18,7 +18,7 @@ fn main() -> Result<(), String> {
     let verbose: bool = conf.verbose;
 
     if verbose {
-        println!("Using {} bits of RAM as detector", 8*size);
+        println!("Using {} bits of RAM as detector", 8 * size);
         io::stdout().flush().unwrap();
     }
 
@@ -68,7 +68,7 @@ fn main() -> Result<(), String> {
         );
         let location = detector_mass.iter().position(|&r| r != 0).unwrap() + 1;
         println!(
-            "Bit flip at byte {}, it became {}",
+            "Bit flip in byte {}, it became {}",
             location,
             detector_mass[location - 1]
         );
