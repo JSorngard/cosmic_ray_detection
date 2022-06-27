@@ -1,6 +1,7 @@
 use clap::{Arg, Command};
 use rayon::prelude::*;
 use std::io::{self, Write};
+use std::ptr::read_volatile;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
@@ -42,7 +43,7 @@ fn main() -> Result<(), String> {
     }
 
     let mut checks: u64 = 1;
-    let mut everything_is_fine = true;    
+    let mut everything_is_fine = true;
     loop {
         //Some feedback for the user that the program is still running
         if verbose {
@@ -50,20 +51,31 @@ fn main() -> Result<(), String> {
             io::stdout().flush().unwrap();
         }
 
-        while everything_is_fine {
-            //We're not gonna miss any events by being too slow
-            sleep(sleep_duration);
-            //Check if all the bytes are still zero
-            everything_is_fine = if conf.parallel {
-                detector.par_iter().all(|i| *i == 0)
-            } else {
-                detector.iter().all(|i| *i == 0)
-            };
-            if verbose {
-                print!("\rIntegrity checks passed: {}", checks);
-                io::stdout().flush().unwrap();
+        {
+            //In order to prevent the optimizer from removing the reads of the memory that make up the detector
+            //we will create a reference to it, and use volatile reads on it.
+            //thanks to /u/HeroicKatora on reddit for this idea.
+            let detector_viewer = &detector;
+
+            while everything_is_fine {
+                //We're not gonna miss any events by being too slow
+                sleep(sleep_duration);
+                //Check if all the bytes are still zero
+                everything_is_fine = if conf.parallel {
+                    detector_viewer
+                        .par_iter()
+                        .all(|i| unsafe { read_volatile(i) == 0 })
+                } else {
+                    detector_viewer
+                        .iter()
+                        .all(|i| unsafe { read_volatile(i) == 0 })
+                };
+                if verbose {
+                    print!("\rIntegrity checks passed: {}", checks);
+                    io::stdout().flush().unwrap();
+                }
+                checks += 1;
             }
-            checks += 1;
         }
 
         println!();
@@ -74,11 +86,7 @@ fn main() -> Result<(), String> {
             checks
         );
         let index = detector.iter().position(|&r| r != 0).unwrap();
-        println!(
-            "Bit flip in byte {}, it became {}",
-            index,
-            detector[index]
-        );
+        println!("Bit flip in byte {}, it became {}", index, detector[index]);
 
         //Reset detector!
         detector[index] = 0;
@@ -149,7 +157,10 @@ impl Config {
         let delay_default = "30000";
 
         let args = Command::new("cosmic ray detector")
-            .about("monitors memory for bit-flips (won't work on ECC memory)")
+            .about("Monitors memory for bit-flips (won't work on ECC memory). Expect a 0.5% chance of a detection per GB of detector memory and hour that the program runs")
+            //IBM found one detection per month and 256 MB of memory
+            //source: https://www.scientificamerican.com/article/solar-storms-fast-facts/
+            //which I have converted to units of 1/(GB*h).
             .version("v0.1.0")
             .author("Johanna Sörngård (jsorngard@gmail.com)")
             .arg(
