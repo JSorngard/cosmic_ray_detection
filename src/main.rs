@@ -59,7 +59,11 @@ fn main() -> Result<(), String> {
     let mut everything_is_fine: bool;
     loop {
         //Reset detector!
-        detector.iter_mut().for_each(|n| *n = 0);
+        if conf.parallel {
+            detector.par_iter_mut().for_each(|n| *n = 0);
+        } else {
+            detector.iter_mut().for_each(|n| *n = 0);
+        }
         everything_is_fine = true;
 
         //Some feedback for the user that the program is still running
