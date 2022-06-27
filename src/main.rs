@@ -30,9 +30,16 @@ fn main() -> Result<(), String> {
     //we just allocate some memory on this here computer.
     //Less exciting, but much cheaper
     let mut detector: Vec<u8> = vec![0; size];
+    if verbose {
+        print!("Initializing detector RAM with random values...");
+        io::stdout().flush().unwrap();
+    };
     detector
         .iter_mut()
         .for_each(|n| unsafe { write_volatile(n, rng.gen()) }); //Avoid the pitfalls of virtual memory by writing random values to the allocated memory first. Thanks to /u/csdt0 on reddit for this idea.
+    if verbose {
+        println!("done");
+    }
 
     let start: Instant = Instant::now();
     let sleep_duration: Duration = Duration::from_millis(conf.check_delay);
