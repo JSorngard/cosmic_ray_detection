@@ -1,5 +1,6 @@
 use clap::{Arg, Command};
-use rand::Rng;
+use rand::prelude::*;
+use rand_xoshiro::Xoshiro256Plus;
 use rayon::prelude::*;
 use std::io::{self, Write};
 use std::ptr::{read_volatile, write_volatile};
@@ -7,6 +8,8 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 fn main() -> Result<(), String> {
+    const SEED: u64 = 42;
+
     let conf: Config = match Config::new() {
         Ok(c) => c,
         Err(e) => return Err(e),
@@ -24,7 +27,8 @@ fn main() -> Result<(), String> {
         io::stdout().flush().unwrap();
     }
 
-    let mut rng = rand::thread_rng();
+    //We use this generator for its speed.
+    let mut rng = Xoshiro256Plus::seed_from_u64(SEED);
 
     //Instead of building a detector out of scintillators and photo multiplier tubes,
     //we just allocate some memory on this here computer.
