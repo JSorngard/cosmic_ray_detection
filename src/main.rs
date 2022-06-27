@@ -58,6 +58,8 @@ fn main() {
             }
         }
 
+        println!();
+
         println!(
             "Detected a bitflip after {:?} on integrity check number {}",
             start.elapsed(),
@@ -143,12 +145,14 @@ impl Config {
             .arg(
                 Arg::with_name("parallel")
                     .help("whether to run the integrity check in parallel to speed it up")
+                    .long("parallel")
                     .takes_value(false)
                     .required(false),
             )
             .arg(
                 Arg::with_name("verbose")
                     .help("whether to print more information about the program state")
+                    .long("verbose")
                     .takes_value(false)
                     .required(false),
             )
