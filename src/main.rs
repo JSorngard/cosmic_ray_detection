@@ -180,10 +180,7 @@ impl Config {
         let delay_default = "30000";
 
         let args = Command::new("cosmic ray detector")
-            .about("Monitors memory for bit-flips (won't work on ECC memory). Expect a 0.5% chance of a detection per GB of detector memory and hour that the program runs")
-            //IBM found one detection per month and 256 MB of memory
-            //source: https://www.scientificamerican.com/article/solar-storms-fast-facts/
-            //which I have converted to units of 1/(GB*h).
+            .about("Monitors memory for bit-flips (won't work on ECC memory). The chance of detection scales with the size of your DRAM modules and the percentage of them you allocate to this program.")
             .version("v0.1.0")
             .author("Johanna Sörngård (jsorngard@gmail.com)")
             .arg(
