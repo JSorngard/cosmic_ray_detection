@@ -80,12 +80,12 @@ fn main() {
     }
 
     println!(
-        "Detected a bitflip after {} seconds on the {} integrity check",
-        start.elapsed().as_secs(),
+        "Detected a bitflip after {:?} on the {} integrity check",
+        start.elapsed(),
         checks
     );
-    let location = detector_mass.iter().position(|&r| !r).unwrap();
-    println!("It was the {}:th boolean that flipped", location + 1);
+    let location = detector_mass.iter().position(|&r| !r).unwrap() + 1;
+    println!("It was the {}:th boolean that flipped", location);
 }
 
 struct Config {
@@ -109,7 +109,7 @@ impl Config {
             )
             .arg(
                 Arg::with_name("check_delay")
-                    .help("an optional delay in between each integrity checks (in milliseconds)")
+                    .help("an optional delay in between each integrity check (in milliseconds)")
                     .short('d')
                     .takes_value(true)
                     .required(false),
