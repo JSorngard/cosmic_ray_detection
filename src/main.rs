@@ -41,7 +41,7 @@ fn main() -> Result<(), String> {
         }
     }
 
-    let mut checks: u64 = 1;
+    let mut checks: u64 = 0;
     let mut everything_is_fine = true;    
     loop {
         //Some feedback for the user that the program is still running
@@ -59,11 +59,11 @@ fn main() -> Result<(), String> {
             } else {
                 detector.iter().all(|i| *i == 0)
             };
+            checks += 1;
             if verbose {
                 print!("\rIntegrity checks passed: {}", checks);
                 io::stdout().flush().unwrap();
             }
-            checks += 1;
         }
 
         println!();
