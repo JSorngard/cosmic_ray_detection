@@ -167,11 +167,7 @@ impl Config {
 
         let verbose = !args.is_present("quiet");
 
-        let memory_to_occupy = match args.value_of("memory_size") {
-            Some(m) => m,
-            None => "1GB",
-        }
-        .to_owned();
+        let memory_to_occupy = args.value_of("memory_size").unwrap_or("1GB").to_owned();
 
         let check_delay: u64 = match args.value_of("check_delay") {
             Some(s) => match s.parse() {
