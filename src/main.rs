@@ -24,7 +24,7 @@ fn main() -> Result<(), String> {
 
     //Instead of building a detector out of scintillators and photo multiplier tubes,
     //we just allocate some zeros on this here computer
-    let mut detector_mass: Vec<u8> = vec![0; size];
+    let mut detector: Vec<u8> = vec![0; size];
     //less exciting, but much cheaper
 
     let start: Instant = Instant::now();
@@ -55,9 +55,9 @@ fn main() -> Result<(), String> {
             sleep(sleep_duration);
             //Check if all the bytes are still zero
             everything_is_fine = if conf.parallel {
-                detector_mass.par_iter().all(|i| *i == 0)
+                detector.par_iter().all(|i| *i == 0)
             } else {
-                detector_mass.iter().all(|i| *i == 0)
+                detector.iter().all(|i| *i == 0)
             };
             if verbose {
                 print!("\rIntegrity checks passed: {}", checks);
@@ -73,15 +73,15 @@ fn main() -> Result<(), String> {
             start.elapsed(),
             checks
         );
-        let index = detector_mass.iter().position(|&r| r != 0).unwrap();
+        let index = detector.iter().position(|&r| r != 0).unwrap();
         println!(
             "Bit flip in byte {}, it became {}",
             index,
-            detector_mass[index]
+            detector[index]
         );
 
         //Reset detector!
-        detector_mass[index] = 0;
+        detector[index] = 0;
         everything_is_fine = true;
     }
 }
