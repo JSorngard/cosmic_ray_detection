@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 clap = "3.2.6"
 rayon = "1.5.3"
+rand = "0.8.5"

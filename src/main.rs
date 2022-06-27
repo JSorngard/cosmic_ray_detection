@@ -4,6 +4,7 @@ use std::io::{self, Write};
 use std::ptr::read_volatile;
 use std::thread::sleep;
 use std::time::{Duration, Instant};
+use rand::Rng;
 
 fn main() -> Result<(), String> {
     let conf: Config = match Config::new() {
@@ -23,9 +24,12 @@ fn main() -> Result<(), String> {
         io::stdout().flush().unwrap();
     }
 
+    let mut rng = rand::thread_rng();
+
     //Instead of building a detector out of scintillators and photo multiplier tubes,
-    //we just allocate some zeros on this here computer
+    //we just allocate some memory on this here computer
     let mut detector: Vec<u8> = vec![0; size];
+    detector.iter_mut().for_each(|n| *n = rng.gen());//Avoid the pitfalls of virtual memory by writing random values to the allocated memory first. Thanks to /u/csdt0 on reddit for this idea.
     //less exciting, but much cheaper
 
     let start: Instant = Instant::now();
@@ -43,7 +47,7 @@ fn main() -> Result<(), String> {
     }
 
     let mut checks: u64 = 1;
-    let mut everything_is_fine = true;
+    let mut everything_is_fine: bool;
     loop {
         //Some feedback for the user that the program is still running
         if verbose {
@@ -51,6 +55,10 @@ fn main() -> Result<(), String> {
             io::stdout().flush().unwrap();
         }
 
+        //Reset detector!
+        detector.iter_mut().for_each(|n| *n = 0);
+        everything_is_fine = true;
+        
         {
             //In order to prevent the optimizer from removing the reads of the memory that make up the detector
             //we will create a reference to it, and use volatile reads on it.
@@ -87,10 +95,6 @@ fn main() -> Result<(), String> {
         );
         let index = detector.iter().position(|&r| r != 0).unwrap();
         println!("Bit flip in byte {}, it became {}", index, detector[index]);
-
-        //Reset detector!
-        detector[index] = 0;
-        everything_is_fine = true;
     }
 }
 
