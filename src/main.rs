@@ -34,7 +34,7 @@ fn main() -> Result<(), String> {
     };
     detector
         .iter_mut()
-        .for_each(|n| unsafe { write_volatile(n, 42) }); //Avoid the pitfalls of virtual memory by writing random values to the allocated memory first. Thanks to /u/csdt0 on reddit for this idea.
+        .for_each(|n| unsafe { write_volatile(n, 42) }); //Avoid the pitfalls of virtual memory by writing values to the allocated memory first. Thanks to /u/csdt0 on reddit for this idea.
     if verbose {
         println!("done");
     }
