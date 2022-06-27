@@ -130,7 +130,7 @@ struct Config {
 impl Config {
     fn new() -> Result<Self, String> {
         let memory_default = "1GB";
-        let delay_default = 30000;
+        let delay_default = "30000";
 
         let args = Command::new("cosmic ray detector")
             .about("monitors memory for bit-flips (won't work on ECC memory)")
@@ -150,7 +150,7 @@ impl Config {
                     .short('d')
                     .takes_value(true)
                     .required(false)
-                    .default_value(&*format!("{}", delay_default)),
+                    .default_value(delay_default),
             )
             .arg(
                 Arg::with_name("parallel")
