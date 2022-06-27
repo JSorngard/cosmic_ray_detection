@@ -21,7 +21,7 @@ fn main() -> Result<(), String> {
         print!("Allocating {} bits of detector RAM... ", size);
         io::stdout().flush().unwrap();
     }
-    let mut detector_mass: Vec<bool> = vec![true; size];
+    let mut detector_mass: Vec<u64> = vec![0; size];
     if verbose {
         println!("done");
     }
@@ -45,7 +45,7 @@ fn main() -> Result<(), String> {
                 println!("Running checks in parallel");
             }
 
-            while detector_mass.par_iter().all(|i| *i) {
+            while detector_mass.par_iter().all(|i| *i == 0) {
                 sleep(sleep_duration);
                 if verbose {
                     print!("\rChecks completed: {}", checks);
@@ -54,7 +54,7 @@ fn main() -> Result<(), String> {
                 checks += 1;
             }
         } else {
-            while detector_mass.iter().all(|i| *i) {
+            while detector_mass.iter().all(|i| *i == 0) {
                 sleep(sleep_duration);
                 if verbose {
                     print!("\rChecks completed: {}", checks);
@@ -71,10 +71,10 @@ fn main() -> Result<(), String> {
             start.elapsed(),
             checks
         );
-        let location = detector_mass.iter().position(|&r| !r).unwrap() + 1;
-        println!("Boolean {} flipped", location);
+        let location = detector_mass.iter().position(|&r| r != 0).unwrap() + 1;
+        println!("Bit flip in u64 {}, it became {}", location, detector_mass[location - 1]);
 
-        detector_mass[location - 1] = true;
+        detector_mass[location - 1] = 0;
     }
 }
 
