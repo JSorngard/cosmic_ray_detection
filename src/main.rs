@@ -18,10 +18,10 @@ fn main() -> Result<(), String> {
     let verbose: bool = conf.verbose;
 
     if verbose {
-        println!("Using {} bits of detector RAM", size);
+        println!("Using {} bits of RAM as detector", size);
         io::stdout().flush().unwrap();
     }
-    
+
     let mut detector_mass: Vec<usize> = vec![0; size];
 
     let start: Instant = Instant::now();
@@ -68,7 +68,11 @@ fn main() -> Result<(), String> {
             checks
         );
         let location = detector_mass.iter().position(|&r| r != 0).unwrap() + 1;
-        println!("Bit flip at index {}, it became {}", location, detector_mass[location - 1]);
+        println!(
+            "Bit flip at index {}, it became {}",
+            location,
+            detector_mass[location - 1]
+        );
 
         detector_mass[location - 1] = 0;
         everything_is_fine = true;
@@ -135,7 +139,7 @@ impl Config {
                     .help("the size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3Mb")
                     .short('m')
                     .takes_value(true)
-                    .required(true),
+                    .required(false),
             )
             .arg(
                 Arg::with_name("check_delay")
@@ -164,8 +168,11 @@ impl Config {
 
         let verbose = !args.is_present("quiet");
 
-        //unwrap is okay because this code does not run if the memory_size argument wasn't given
-        let memory_to_occupy = args.value_of("memory_size").unwrap().to_owned();
+        let memory_to_occupy = match args.value_of("memory_size") {
+            Some(m) => m,
+            None => "1GB",
+        }
+        .to_owned();
 
         let check_delay: u64 = match args.value_of("check_delay") {
             Some(s) => match s.parse() {
