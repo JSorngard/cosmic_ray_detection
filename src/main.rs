@@ -41,7 +41,7 @@ fn main() {
     }
 
     println!(
-        "Detected a bitflip after {:?} on the {} integrity check",
+        "Detected a bitflip after {:?} on integrity check number {}",
         start.elapsed(),
         checks
     );
