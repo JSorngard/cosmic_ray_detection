@@ -18,13 +18,11 @@ fn main() -> Result<(), String> {
     let verbose: bool = conf.verbose;
 
     if verbose {
-        print!("Allocating {} bits of detector RAM... ", size);
+        println!("Using {} bits of detector RAM", size);
         io::stdout().flush().unwrap();
     }
+    
     let mut detector_mass: Vec<usize> = vec![0; size];
-    if verbose {
-        println!("done");
-    }
 
     let start: Instant = Instant::now();
     let sleep_duration: Duration = Duration::from_millis(conf.check_delay);
