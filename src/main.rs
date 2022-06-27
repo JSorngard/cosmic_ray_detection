@@ -75,7 +75,7 @@ fn main() -> Result<(), String> {
         let index = detector_mass.iter().position(|&r| r != 0).unwrap();
         println!(
             "Bit flip in byte {}, it became {}",
-            index + 1,
+            index,
             detector_mass[index]
         );
 
