@@ -18,11 +18,11 @@ fn main() -> Result<(), String> {
     let verbose: bool = conf.verbose;
 
     if verbose {
-        println!("Using {} bits of RAM as detector", size);
+        println!("Using {} bits of RAM as detector", 8*size);
         io::stdout().flush().unwrap();
     }
 
-    let mut detector_mass: Vec<usize> = vec![0; size];
+    let mut detector_mass: Vec<u8> = vec![0; size];
 
     let start: Instant = Instant::now();
     let sleep_duration: Duration = Duration::from_millis(conf.check_delay);
@@ -33,9 +33,8 @@ fn main() -> Result<(), String> {
         } else {
             println!("Waiting {:?} between integrity checks", sleep_duration);
         }
-
-        if verbose {
-            println!("Running checks in parallel");
+        if conf.parallel {
+            println!("Checking memory integrity in parallel");
         }
     }
 
