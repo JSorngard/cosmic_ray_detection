@@ -42,13 +42,14 @@ fn main() -> Result<(), String> {
     }
 
     let mut checks: u64 = 1;
-    let mut everything_is_fine = true;
-    //Some feedback for the user that the program is still running
-    if verbose {
-        print!("Waiting for first check");
-        io::stdout().flush().unwrap();
-    }
+    let mut everything_is_fine = true;    
     loop {
+        //Some feedback for the user that the program is still running
+        if verbose {
+            print!("Waiting for first check");
+            io::stdout().flush().unwrap();
+        }
+        
         while everything_is_fine {
             //We're not gonna miss any events by being too slow
             sleep(sleep_duration);
