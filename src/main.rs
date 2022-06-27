@@ -22,7 +22,10 @@ fn main() -> Result<(), String> {
         io::stdout().flush().unwrap();
     }
 
+    //Instead of building a detector out of scintillators and photo multiplier tubes,
+    //we just allocate some zeros on this here computer
     let mut detector_mass: Vec<u8> = vec![0; size];
+    //less exciting, but much cheaper
 
     let start: Instant = Instant::now();
     let sleep_duration: Duration = Duration::from_millis(conf.check_delay);
@@ -40,13 +43,16 @@ fn main() -> Result<(), String> {
 
     let mut checks: u64 = 1;
     let mut everything_is_fine = true;
+    //Some feedback for the user that the program is still running
     if verbose {
         print!("Waiting for first check");
         io::stdout().flush().unwrap();
     }
     loop {
         while everything_is_fine {
+            //We're not gonna miss any events by being too slow
             sleep(sleep_duration);
+            //Check if all the bytes are still zero
             everything_is_fine = if conf.parallel {
                 detector_mass.par_iter().all(|i| *i == 0)
             } else {
@@ -66,14 +72,15 @@ fn main() -> Result<(), String> {
             start.elapsed(),
             checks
         );
-        let location = detector_mass.iter().position(|&r| r != 0).unwrap() + 1;
+        let index = detector_mass.iter().position(|&r| r != 0).unwrap();
         println!(
             "Bit flip in byte {}, it became {}",
-            location,
-            detector_mass[location - 1]
+            index + 1,
+            detector_mass[index]
         );
 
-        detector_mass[location - 1] = 0;
+        //Reset detector!
+        detector_mass[index] = 0;
         everything_is_fine = true;
     }
 }
@@ -84,11 +91,15 @@ fn parse_size_string(size_string: String) -> Result<usize, String> {
         Err(_) => {
             let chars: Vec<char> = size_string.chars().collect();
             let len: usize = chars.len();
-            //unwrap is okay, because clap doesn't let the program run without input in this variable
-            let last: char = *chars.last().unwrap();
+            let last: char = match chars.last() {
+                Some(l) => *l,
+                None => return Err("memory_to_occupy was empty".to_owned()),
+            };
+
             if (last != 'B' && last != 'b') || len < 2 {
                 return Err("memory_to_occupy was incorrectly formatted".to_owned());
             }
+
             let next_to_last: char = chars[len - 2];
 
             let si_prefix_factor: f64 = if next_to_last == 'k' {
