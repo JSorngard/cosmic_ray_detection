@@ -1,6 +1,4 @@
 use clap::{Arg, Command};
-use rand::prelude::*;
-use rand_xoshiro::Xoshiro256Plus;
 use rayon::prelude::*;
 use std::io::{self, Write};
 use std::ptr::{read_volatile, write_volatile};
@@ -8,7 +6,6 @@ use std::thread::sleep;
 use std::time::{Duration, Instant};
 
 fn main() -> Result<(), String> {
-    const SEED: u64 = 42;
 
     let conf: Config = match Config::new() {
         Ok(c) => c,
@@ -27,20 +24,17 @@ fn main() -> Result<(), String> {
         io::stdout().flush().unwrap();
     }
 
-    //We use this generator for its speed.
-    let mut rng = Xoshiro256Plus::seed_from_u64(SEED);
-
     //Instead of building a detector out of scintillators and photo multiplier tubes,
     //we just allocate some memory on this here computer.
     //Less exciting, much less accurate and sensitive, but much cheaper
     let mut detector: Vec<u8> = vec![0; size];
     if verbose {
-        print!("Initializing detector RAM with random values...");
-        io::stdout().flush().unwrap();
+        print!("Initializing detector RAM...");
+        flush();
     };
     detector
         .iter_mut()
-        .for_each(|n| unsafe { write_volatile(n, rng.gen()) }); //Avoid the pitfalls of virtual memory by writing random values to the allocated memory first. Thanks to /u/csdt0 on reddit for this idea.
+        .for_each(|n| unsafe { write_volatile(n, 42) }); //Avoid the pitfalls of virtual memory by writing random values to the allocated memory first. Thanks to /u/csdt0 on reddit for this idea.
     if verbose {
         println!("done");
     }
@@ -73,7 +67,7 @@ fn main() -> Result<(), String> {
         //Some feedback for the user that the program is still running
         if verbose {
             print!("Waiting for first check");
-            io::stdout().flush().unwrap();
+            flush();
         }
 
         {
@@ -97,7 +91,7 @@ fn main() -> Result<(), String> {
                 };
                 if verbose {
                     print!("\rIntegrity checks passed: {}", checks);
-                    io::stdout().flush().unwrap();
+                    flush();
                 }
                 checks += 1;
             }
@@ -116,6 +110,11 @@ fn main() -> Result<(), String> {
         };
         
     }
+}
+
+#[inline(always)]
+fn flush() {
+    io::stdout().flush().unwrap();
 }
 
 fn parse_size_string(size_string: String) -> Result<usize, String> {
