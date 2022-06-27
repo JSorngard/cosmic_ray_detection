@@ -58,15 +58,15 @@ fn main() -> Result<(), String> {
     let mut checks: u64 = 1;
     let mut everything_is_fine: bool;
     loop {
+        //Reset detector!
+        detector.iter_mut().for_each(|n| *n = 0);
+        everything_is_fine = true;
+
         //Some feedback for the user that the program is still running
         if verbose {
             print!("Waiting for first check");
             io::stdout().flush().unwrap();
         }
-
-        //Reset detector!
-        detector.iter_mut().for_each(|n| *n = 0);
-        everything_is_fine = true;
 
         {
             //In order to prevent the optimizer from removing the reads of the memory that make up the detector
