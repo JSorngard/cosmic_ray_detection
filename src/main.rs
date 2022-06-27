@@ -68,7 +68,7 @@ fn main() -> Result<(), String> {
         );
         let location = detector_mass.iter().position(|&r| r != 0).unwrap() + 1;
         println!(
-            "Bit flip at index {}, it became {}",
+            "Bit flip at byte {}, it became {}",
             location,
             detector_mass[location - 1]
         );
