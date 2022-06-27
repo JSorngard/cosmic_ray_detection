@@ -72,7 +72,7 @@ fn main() -> Result<(), String> {
             checks
         );
         let location = detector_mass.iter().position(|&r| r != 0).unwrap() + 1;
-        println!("Bit flip in u64 {}, it became {}", location, detector_mass[location - 1]);
+        println!("Bit flip at index {}, it became {}", location, detector_mass[location - 1]);
 
         detector_mass[location - 1] = 0;
     }
