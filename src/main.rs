@@ -185,7 +185,7 @@ impl Config {
             .author("Johanna Sörngård (jsorngard@gmail.com)")
             .arg(
                 Arg::with_name("memory_size")
-                    .help(&*format!("the size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3Mb (default: {})", memory_default))
+                    .help("the size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3Mb")
                     .short('m')
                     .takes_value(true)
                     .required(false)
@@ -193,7 +193,7 @@ impl Config {
             )
             .arg(
                 Arg::with_name("check_delay")
-                    .help(&*format!("an optional delay in between each integrity check (in milliseconds) (default: {})", delay_default))
+                    .help("an optional delay in between each integrity check (in milliseconds)")
                     .short('d')
                     .takes_value(true)
                     .required(false)
