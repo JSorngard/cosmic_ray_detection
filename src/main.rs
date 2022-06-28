@@ -19,30 +19,12 @@ fn main() -> Result<(), String> {
 
     let verbose: bool = conf.verbose;
 
-    if verbose {
-        println!("Using {} bits of RAM as detector", 8 * size);
-        io::stdout().flush().unwrap();
-    }
-
-    //Instead of building a detector out of scintillators and photo multiplier tubes,
-    //we just allocate some memory on this here computer.
-    //Less exciting, much less accurate and sensitive, but much cheaper
-    let mut detector: Vec<u8> = vec![0; size];
-    if verbose {
-        print!("Initializing detector RAM...");
-        flush();
-    };
-    detector
-        .iter_mut()
-        .for_each(|n| unsafe { write_volatile(n, 42) }); //Avoid the pitfalls of virtual memory by writing values to the allocated memory first. Thanks to /u/csdt0 on reddit for this idea.
-    if verbose {
-        println!("done");
-    }
-
-    let start: Instant = Instant::now();
     let sleep_duration: Duration = Duration::from_millis(conf.check_delay);
 
     if verbose {
+        println!("\n------------ Runtime settings ------------");
+        println!("Using {} bits of RAM as detector", 8 * size);
+
         if conf.check_delay == 0 {
             println!("Will do continuous integrity checks");
         } else {
@@ -51,21 +33,46 @@ fn main() -> Result<(), String> {
         if conf.parallel {
             println!("Checking memory integrity in parallel");
         }
+        println!("------------------------------------------\n");
+
+        print!("Allocating detector memory...");
+        flush();
     }
+
+    //Instead of building a detector out of scintillators and photo multiplier tubes,
+    //we just allocate some memory on this here computer.
+    //Less exciting, much less accurate and sensitive, but much cheaper
+    let mut detector: Vec<u8> = vec![0; size];
+    detector
+        .iter_mut()
+        .for_each(|n| unsafe { write_volatile(n, 42) }); //Avoid the pitfalls of virtual memory by writing values to the allocated memory first. Thanks to /u/csdt0 on reddit for this idea.
+    if verbose {
+        println!("done");
+    }
+
+    let start: Instant = Instant::now();
 
     let mut checks: u64 = 1;
     let mut everything_is_fine: bool;
+    if verbose {
+        println!("\nBeginning detection loop");
+    }
     loop {
         //Reset detector!
+        if verbose {
+            print!("Zeroing detector memory... ");
+            flush();
+        }
         if conf.parallel {
-            detector.par_iter_mut().for_each(|n| *n = 0);
+            detector.par_iter_mut().for_each(|n| unsafe {write_volatile(n, 0)});
         } else {
-            detector.iter_mut().for_each(|n| *n = 0);
+            detector.iter_mut().for_each(|n| unsafe {write_volatile(n, 0)});
         }
         everything_is_fine = true;
 
         //Some feedback for the user that the program is still running
         if verbose {
+            println!("done");
             print!("Waiting for first check");
             flush();
         }
