@@ -181,7 +181,7 @@ impl Config {
 
         let args = Command::new("cosmic ray detector")
             .about("Monitors memory for bit-flips (won't work on ECC memory). The chance of detection scales with the size of your DRAM modules and the percentage of them you allocate to this program.")
-            .version("v0.1.0")
+            .version("v0.1.1")
             .author("Johanna Sörngård (jsorngard@gmail.com)")
             .arg(
                 Arg::with_name("memory_size")
