@@ -1,9 +1,11 @@
-use clap::{Arg, Command};
 use rayon::prelude::*;
 use std::io::{self, Write};
 use std::ptr::{read_volatile, write_volatile};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
+use crate::config::Config;
+
+mod config;
 
 fn main() -> Result<(), String> {
 
@@ -171,76 +173,5 @@ fn parse_size_string(size_string: String) -> Result<usize, String> {
 
             Ok(number * factor)
         }
-    }
-}
-
-struct Config {
-    memory_to_occupy: String,
-    check_delay: u64,
-    parallel: bool,
-    verbose: bool,
-}
-
-impl Config {
-    fn new() -> Result<Self, String> {
-        let memory_default = "1GB";
-        let delay_default = "30000";
-
-        let args = Command::new("cosmic ray detector")
-            .about("Monitors memory for bit-flips (won't work on ECC memory). The chance of detection scales with the physical size of your DRAM modules and the percentage of them you allocate to this program.")
-            .version("v1.0.0")
-            .author("Johanna Sörngård (jsorngard@gmail.com)")
-            .arg(
-                Arg::with_name("memory_size")
-                    .help("the size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3Mb")
-                    .short('m')
-                    .takes_value(true)
-                    .required(false)
-                    .default_value(memory_default),
-            )
-            .arg(
-                Arg::with_name("check_delay")
-                    .help("an optional delay in between each integrity check (in milliseconds)")
-                    .short('d')
-                    .takes_value(true)
-                    .required(false)
-                    .default_value(delay_default),
-            )
-            .arg(
-                Arg::with_name("parallel")
-                    .help("whether to run the integrity check in parallel to speed it up")
-                    .long("parallel")
-                    .takes_value(false)
-                    .required(false),
-            )
-            .arg(
-                Arg::with_name("quiet")
-                    .help("whether to only print information about eventual detections")
-                    .long("quiet")
-                    .takes_value(false)
-                    .required(false),
-            )
-            .get_matches();
-
-        let parallel = args.is_present("parallel");
-
-        let verbose = !args.is_present("quiet");
-
-        let memory_to_occupy = args.value_of("memory_size").unwrap_or("1GB").to_owned();
-
-        let check_delay: u64 = match args.value_of("check_delay") {
-            Some(s) => match s.parse() {
-                Ok(t) => t,
-                Err(e) => return Err(e.to_string()),
-            },
-            None => 0,
-        };
-
-        Ok(Config {
-            memory_to_occupy,
-            check_delay,
-            parallel,
-            verbose,
-        })
     }
 }
