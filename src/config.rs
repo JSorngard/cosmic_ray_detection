@@ -18,7 +18,7 @@ impl Config {
             .author("Johanna Sörngård (jsorngard@gmail.com)")
             .arg(
                 Arg::with_name("memory_size")
-                    .help("the size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3Mb")
+                    .help("The size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3Mb")
                     .short('m')
                     .takes_value(true)
                     .required(false)
@@ -26,7 +26,7 @@ impl Config {
             )
             .arg(
                 Arg::with_name("check_delay")
-                    .help("an optional delay in between each integrity check (in milliseconds)")
+                    .help("An optional delay in between each integrity check (in milliseconds)")
                     .short('d')
                     .takes_value(true)
                     .required(false)
@@ -34,14 +34,14 @@ impl Config {
             )
             .arg(
                 Arg::with_name("parallel")
-                    .help("whether to run the integrity check in parallel to speed it up")
+                    .help("Whether to run the integrity check in parallel to speed it up")
                     .long("parallel")
                     .takes_value(false)
                     .required(false),
             )
             .arg(
                 Arg::with_name("quiet")
-                    .help("whether to only print information about eventual detections")
+                    .help("Whether to only print information about eventual detections")
                     .long("quiet")
                     .takes_value(false)
                     .required(false),
