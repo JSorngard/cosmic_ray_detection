@@ -1,5 +1,5 @@
 use rayon::prelude::*;
-use std::io::{self, Write};
+use std::io::{stdout, Write};
 use std::ptr::{read_volatile, write_volatile};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
@@ -123,7 +123,7 @@ fn main() -> Result<(), String> {
 
 #[inline(always)]
 fn flush() {
-    io::stdout().flush().unwrap();
+    stdout().flush().unwrap();
 }
 
 fn parse_size_string(size_string: String) -> Result<usize, String> {
