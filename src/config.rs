@@ -1,4 +1,4 @@
-use clap::{Command, Arg};
+use clap::{Arg, Command};
 
 const MEMORY_DEFAULT: &str = "1GB";
 const DELAY_DEFAULT: &str = "30000";
@@ -12,7 +12,6 @@ pub struct Config {
 
 impl Config {
     pub fn new() -> Result<Self, String> {
-
         let args = Command::new("cosmic ray detector")
             .about("Monitors memory for bit-flips (won't work on ECC memory). The chance of detection scales with the physical size of your DRAM modules and the percentage of them you allocate to this program.")
             .version("v1.0.0")

@@ -1,14 +1,13 @@
+use crate::config::Config;
 use rayon::prelude::*;
 use std::io::{stdout, Write};
 use std::ptr::{read_volatile, write_volatile};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
-use crate::config::Config;
 
 mod config;
 
 fn main() -> Result<(), String> {
-
     let conf: Config = match Config::new() {
         Ok(c) => c,
         Err(e) => return Err(e),
@@ -20,6 +19,7 @@ fn main() -> Result<(), String> {
     };
 
     let verbose: bool = conf.verbose;
+    let parallel: bool = conf.parallel;
 
     let sleep_duration: Duration = Duration::from_millis(conf.check_delay);
 
@@ -43,33 +43,28 @@ fn main() -> Result<(), String> {
 
     //Instead of building a detector out of scintillators and photo multiplier tubes,
     //we just allocate some memory on this here computer.
-    //Less exciting, much less accurate and sensitive, but much cheaper
     let mut detector: Vec<u8> = vec![0; size];
-    detector
-        .iter_mut()
-        .for_each(|n| unsafe { write_volatile(n, 42) }); //Avoid the pitfalls of virtual memory by writing values to the allocated memory first. Thanks to /u/csdt0 on reddit for this idea.
+    //Less exciting, much less accurate and sensitive, but much cheaper
+
+    //Avoid the pitfalls of virtual memory by writing nonzero values to the allocated memory.
+    //Thanks to /u/csdt0 on reddit for this idea.
+    write_to_detector(&mut detector, 42, parallel);
+
     if verbose {
         println!("done");
+        println!("\nBeginning detection loop");
     }
-
-    let start: Instant = Instant::now();
 
     let mut checks: u64 = 1;
     let mut everything_is_fine: bool;
-    if verbose {
-        println!("\nBeginning detection loop");
-    }
+    let start: Instant = Instant::now();
     loop {
         //Reset detector!
         if verbose {
             print!("Zeroing detector memory... ");
             flush();
         }
-        if conf.parallel {
-            detector.par_iter_mut().for_each(|n| unsafe {write_volatile(n, 0)});
-        } else {
-            detector.iter_mut().for_each(|n| unsafe {write_volatile(n, 0)});
-        }
+        write_to_detector(&mut detector, 0, parallel);
         everything_is_fine = true;
 
         //Some feedback for the user that the program is still running
@@ -79,45 +74,61 @@ fn main() -> Result<(), String> {
             flush();
         }
 
-        {
-            //In order to prevent the optimizer from removing the reads of the memory that make up the detector
-            //we will create a reference to it, and use volatile reads on it.
-            //thanks to /u/HeroicKatora on reddit for this idea.
-            let detector_viewer = &detector;
-
-            while everything_is_fine {
-                //We're not gonna miss any events by being too slow
-                sleep(sleep_duration);
-                //Check if all the bytes are still zero
-                everything_is_fine = if conf.parallel {
-                    detector_viewer
-                        .par_iter()
-                        .all(|i| unsafe { read_volatile(i) == 0 })
-                } else {
-                    detector_viewer
-                        .iter()
-                        .all(|i| unsafe { read_volatile(i) == 0 })
-                };
-                if verbose {
-                    print!("\rIntegrity checks passed: {}", checks);
-                    flush();
-                }
-                checks += 1;
+        while everything_is_fine {
+            //We're not gonna miss any events by being too slow
+            sleep(sleep_duration);
+            //Check if all the bytes are still zero
+            everything_is_fine = check_detector_equals(&detector, 0, parallel);
+            if verbose {
+                print!("\rIntegrity checks passed: {}", checks);
+                flush();
             }
+            checks += 1;
         }
 
-        println!();
-
         println!(
-            "Detected a bitflip after {:?} on integrity check number {}",
+            "\nDetected a bitflip after {:?} on integrity check number {}",
             start.elapsed(),
             checks
         );
         match detector.iter().position(|&r| r != 0) {
             Some(index) => println!("Bit flip in byte {}, it became {}", index, detector[index]),
-            None => println!("The same bit flipped back before we could find which one it was! Incredible!"),
+            None => println!(
+                "The same bit flipped back before we could find which one it was! Incredible!"
+            ),
         };
-        
+    }
+}
+
+//In order to prevent the optimizer from removing the reads of the memory that make up the detector
+//we will create a reference to it, and use volatile reads and writes on it.
+//thanks to /u/HeroicKatora on reddit for this idea.
+
+///Writes the given value to every element of the detector memory.
+///Is done in parallel if `parallel` is set to true.
+fn write_to_detector(detector: &mut [u8], value: u8, parallel: bool) {
+    if parallel {
+        detector
+            .par_iter_mut()
+            .for_each(|n| unsafe { write_volatile(n, value) });
+    } else {
+        detector
+            .iter_mut()
+            .for_each(|n| unsafe { write_volatile(n, value) });
+    }
+}
+
+///Checks if every element of the detector memory is equal to the given value.
+///Is done in parallel if `parallel` is set to true.
+fn check_detector_equals(detector: &[u8], value: u8, parallel: bool) -> bool {
+    if parallel {
+        detector
+            .par_iter()
+            .all(|i| unsafe { read_volatile(i) == value })
+    } else {
+        detector
+            .iter()
+            .all(|i| unsafe { read_volatile(i) == value })
     }
 }
 
