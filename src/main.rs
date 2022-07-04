@@ -13,8 +13,7 @@ fn main() -> Result<(), String> {
         Err(e) => return Err(e),
     };
 
-    let size = conf.memory_to_occupy;
-
+    let size: usize = conf.memory_to_occupy;
     let verbose: bool = conf.verbose;
     let parallel: bool = conf.parallel;
 
