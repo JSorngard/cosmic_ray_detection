@@ -4,10 +4,11 @@ use std::io::{stdout, Write};
 use std::ptr::{read_volatile, write_volatile};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
+use std::error::Error;
 
 mod config;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn Error>> {
     let conf: Config = Config::new()?;
 
     let size: usize = conf.memory_to_occupy;
