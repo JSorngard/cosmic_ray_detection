@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 
 mod config;
 
-fn main() -> Result<(), String> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let conf: Config = Config::new()?;
 
     let size: usize = conf.memory_to_occupy;
