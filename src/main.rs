@@ -8,10 +8,7 @@ use std::time::{Duration, Instant};
 mod config;
 
 fn main() -> Result<(), String> {
-    let conf: Config = match Config::new() {
-        Ok(c) => c,
-        Err(e) => return Err(e),
-    };
+    let conf: Config = Config::new()?;
 
     let size: usize = conf.memory_to_occupy;
     let verbose: bool = conf.verbose;

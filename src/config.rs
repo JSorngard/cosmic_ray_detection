@@ -52,10 +52,7 @@ impl Config {
 
         let verbose = !args.is_present("quiet");
 
-        let memory_to_occupy = match parse_size_string(args.value_of("memory_size").unwrap_or("1GB").to_owned()) {
-            Ok(s) => s,
-            Err(e) => return Err(e),
-        };
+        let memory_to_occupy = parse_size_string(args.value_of("memory_size").unwrap_or("1GB").to_owned())?;
 
         let check_delay: u64 = match args.value_of("check_delay") {
             Some(s) => match s.parse() {
