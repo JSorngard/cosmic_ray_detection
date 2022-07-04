@@ -41,7 +41,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     //Less exciting, much less accurate and sensitive, but much cheaper
 
     //Avoid the pitfalls of virtual memory by writing nonzero values to the allocated memory.
-    //Thanks to /u/csdt0 on reddit for this idea.
     write_to_detector(&mut detector, 42, parallel);
 
     if verbose {
@@ -96,7 +95,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 //In order to prevent the optimizer from removing the reads of the memory that make up the detector
 //we will create a reference to it, and use volatile reads and writes on it.
-//thanks to /u/HeroicKatora on reddit for this idea.
 
 ///Writes the given value to every element of the detector memory.
 ///Is done in parallel if `parallel` is set to true.
