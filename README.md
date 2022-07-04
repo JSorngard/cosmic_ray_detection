@@ -1,6 +1,6 @@
 **Your computer can double up as a cosmic ray detector. Yes, really!**
 
-[Cosmic rays](https://en.wikipedia.org/wiki/Cosmic_ray) hit your computer all the time. If they hit the RAM, this can [sometimes cause issues](https://en.wikipedia.org/wiki/Soft_error#Cosmic_rays_creating_energetic_neutrons_and_protons), like flipping a random bit in memory.
+[Cosmic rays](https://en.wikipedia.org/wiki/Cosmic_ray) hit your computer all the time. If they hit the RAM, this can [sometimes cause disturbances](https://en.wikipedia.org/wiki/Soft_error#Cosmic_rays_creating_energetic_neutrons_and_protons), like flipping a random bit in memory.
 To use your computer as a cosmic ray detector, simply run this program!  
 The detection works by allocating a vector of zeroed bytes and then checking regularly to see if they are all still zero. Ta-da!  
 
