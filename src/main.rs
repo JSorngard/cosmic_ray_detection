@@ -72,7 +72,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             //We're not gonna miss any events by being too slow
             sleep(sleep_duration);
             //Check if all the bytes are still zero
-            everything_is_fine = check_detector_equals(&detector, 0, parallel);
+            everything_is_fine = detector_equals(&detector, 0, parallel);
             if verbose {
                 print!("\rIntegrity checks passed: {}", checks);
                 flush();
@@ -114,7 +114,7 @@ fn write_to_detector(detector: &mut [u8], value: u8, parallel: bool) {
 
 ///Checks if every element of the detector memory is equal to the given value.
 ///Is done in parallel if `parallel` is set to true.
-fn check_detector_equals(detector: &[u8], value: u8, parallel: bool) -> bool {
+fn detector_equals(detector: &[u8], value: u8, parallel: bool) -> bool {
     if parallel {
         detector
             .par_iter()
