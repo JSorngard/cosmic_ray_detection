@@ -14,19 +14,20 @@ fn main() -> Result<(), Box<dyn Error>> {
     let size: usize = conf.memory_to_occupy;
     let verbose: bool = conf.verbose;
     let parallel: bool = conf.parallel;
+    let check_delay: u64 = conf.check_delay;
 
-    let sleep_duration: Duration = Duration::from_millis(conf.check_delay);
+    let sleep_duration: Duration = Duration::from_millis(check_delay);
 
     if verbose {
         println!("\n------------ Runtime settings ------------");
         println!("Using {} bits of RAM as detector", 8 * size);
 
-        if conf.check_delay == 0 {
+        if check_delay == 0 {
             println!("Will do continuous integrity checks");
         } else {
             println!("Waiting {:?} between integrity checks", sleep_duration);
         }
-        if conf.parallel {
+        if parallel {
             println!("Checking memory integrity in parallel");
         }
         println!("------------------------------------------\n");
