@@ -1,20 +1,23 @@
-use crate::config::Config;
-use rayon::prelude::*;
+use std::error::Error;
 use std::io::{stdout, Write};
 use std::ptr::{read_volatile, write_volatile};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
-use std::error::Error;
+
+use crate::config::{parse_size_string, Args};
+
+use clap::Parser;
+use rayon::prelude::*;
 
 mod config;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let conf: Config = Config::new()?;
+    let conf: Args = Args::parse();
 
-    let size: usize = conf.memory_to_occupy;
+    let size: usize = parse_size_string(conf.memory_to_occupy)?;
     let verbose: bool = conf.verbose;
     let parallel: bool = conf.parallel;
-    let check_delay: u64 = conf.check_delay;
+    let check_delay: u64 = conf.delay_between_checks;
 
     let sleep_duration: Duration = Duration::from_millis(check_delay);
 

@@ -1,79 +1,35 @@
-use clap::{Arg, Command};
+use clap::Parser;
 use std::error::Error;
 use std::fmt;
 
 const MEMORY_DEFAULT: &str = "1GB";
-const DELAY_DEFAULT: &str = "30000";
+const DELAY_DEFAULT: u64 = 30000;
 
-pub struct Config {
-    pub memory_to_occupy: usize,
-    pub check_delay: u64,
+///Monitors memory for bit-flips (won't work on ECC memory).
+///The chance of detection scales with the physical size of your DRAM modules
+///and the percentage of them you allocate to this program.
+#[derive(Parser, Debug)]
+#[clap(author, version, about, long_about = None)]
+pub struct Args {
+    #[clap(short, value_parser,  default_value_t = MEMORY_DEFAULT.to_owned(), help = "The size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3Mb")]
+    pub memory_to_occupy: String,
+
+    #[clap(short, value_parser, default_value_t = DELAY_DEFAULT, help = "An optional delay in between each integrity check (in milliseconds)")]
+    pub delay_between_checks: u64,
+
+    #[clap(
+        long,
+        help = "Whether to run the integrity check in parallel to speed it up"
+    )]
     pub parallel: bool,
+
+    #[clap(short, long, help = "Whether to print extra information")]
     pub verbose: bool,
-}
-
-impl Config {
-    pub fn new() -> Result<Self, Box<dyn Error>> {
-        let args = Command::new("cosmic ray detector")
-            .about("Monitors memory for bit-flips (won't work on ECC memory). The chance of detection scales with the physical size of your DRAM modules and the percentage of them you allocate to this program.")
-            .version("v1.0.2")
-            .author("Johanna Sörngård (jsorngard@gmail.com)")
-            .arg(
-                Arg::with_name("memory_size")
-                    .help("The size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3Mb")
-                    .short('m')
-                    .takes_value(true)
-                    .required(false)
-                    .default_value(MEMORY_DEFAULT),
-            )
-            .arg(
-                Arg::with_name("check_delay")
-                    .help("An optional delay in between each integrity check (in milliseconds)")
-                    .short('d')
-                    .takes_value(true)
-                    .required(false)
-                    .default_value(DELAY_DEFAULT),
-            )
-            .arg(
-                Arg::with_name("parallel")
-                    .help("Whether to run the integrity check in parallel to speed it up")
-                    .long("parallel")
-                    .takes_value(false)
-                    .required(false),
-            )
-            .arg(
-                Arg::with_name("quiet")
-                    .help("Whether to only print information about eventual detections")
-                    .long("quiet")
-                    .takes_value(false)
-                    .required(false),
-            )
-            .get_matches();
-
-        let parallel = args.is_present("parallel");
-
-        let verbose = !args.is_present("quiet");
-
-        let memory_to_occupy =
-            parse_size_string(args.value_of("memory_size").unwrap_or("1GB").to_owned())?;
-
-        let check_delay: u64 = match args.value_of("check_delay") {
-            Some(s) => s.parse()?,
-            None => 0,
-        };
-
-        Ok(Config {
-            memory_to_occupy,
-            check_delay,
-            parallel,
-            verbose,
-        })
-    }
 }
 
 ///Parses a string describing a number of bytes into an integer.
 ///The string can use common SI prefixes as well, like '4GB' or '30kB'.
-fn parse_size_string(size_string: String) -> Result<usize, Box<dyn Error>> {
+pub fn parse_size_string(size_string: String) -> Result<usize, Box<dyn Error>> {
     match size_string.parse::<usize>() {
         Ok(t) => Ok(t),
         Err(_) => {
@@ -108,7 +64,7 @@ fn parse_size_string(size_string: String) -> Result<usize, Box<dyn Error>> {
             } else if next_to_last == 'P' {
                 //HOW?!
                 1e15
-            } else if !next_to_last.is_digit(10) {
+            } else if !next_to_last.is_ascii_digit() {
                 return Err(Box::new(MemoryStringError::new(
                     "unsupported memory size".to_owned(),
                 )));
