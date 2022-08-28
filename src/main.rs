@@ -1,15 +1,17 @@
 use std::error::Error;
 use std::io::{stdout, Write};
-use std::ptr::{read_volatile, write_volatile};
 use std::thread::sleep;
 use std::time::{Duration, Instant};
 
-use crate::config::{parse_size_string, Args};
-
 use clap::Parser;
-use rayon::prelude::*;
 
 mod config;
+mod detector;
+
+use crate::{
+    config::{parse_size_string, Args},
+    detector::Detector,
+};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let conf: Args = Args::parse();
@@ -36,16 +38,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         println!("------------------------------------------\n");
 
         print!("Allocating detector memory...");
-        flush();
+        stdout().flush()?;
     }
 
     //Instead of building a detector out of scintillators and photo multiplier tubes,
     //we just allocate some memory on this here computer.
-    let mut detector: Vec<u8> = vec![0; size];
+    let mut detector = Detector::new(parallel, 0, size);
     //Less exciting, much less accurate and sensitive, but much cheaper
 
     //Avoid the pitfalls of virtual memory by writing nonzero values to the allocated memory.
-    write_to_detector(&mut detector, 42, parallel);
+    detector.write(42);
 
     if verbose {
         println!("done");
@@ -59,26 +61,26 @@ fn main() -> Result<(), Box<dyn Error>> {
         //Reset detector!
         if verbose {
             print!("Zeroing detector memory... ");
-            flush();
+            stdout().flush()?;
         }
-        write_to_detector(&mut detector, 0, parallel);
+        detector.reset();
         everything_is_fine = true;
 
         //Some feedback for the user that the program is still running
         if verbose {
             println!("done");
             print!("Waiting for first check");
-            flush();
+            stdout().flush()?;
         }
 
         while everything_is_fine {
             //We're not gonna miss any events by being too slow
             sleep(sleep_duration);
             //Check if all the bytes are still zero
-            everything_is_fine = detector_equals(&detector, 0, parallel);
+            everything_is_fine = detector.is_intact();
             if verbose {
                 print!("\rIntegrity checks passed: {}", checks);
-                flush();
+                stdout().flush()?;
             }
             checks += 1;
         }
@@ -88,47 +90,17 @@ fn main() -> Result<(), Box<dyn Error>> {
             start.elapsed(),
             checks
         );
-        match detector.iter().position(|&r| r != 0) {
-            Some(index) => println!("Bit flip in byte {}, it became {}", index, detector[index]),
+
+        match detector.find_index_of_changed_element() {
+            Some(index) => println!(
+                "Bit flip in byte at index {}, it became {}",
+                index,
+                //unwrap() is okay since we already found the index of the value in the detector earlier.
+                detector.get(index).unwrap(),
+            ),
             None => println!(
                 "The same bit flipped back before we could find which one it was! Incredible!"
             ),
-        };
+        }
     }
-}
-
-//In order to prevent the optimizer from removing the reads of the memory that make up the detector
-//we will create a reference to it, and use volatile reads and writes on it.
-
-///Writes the given value to every element of the detector memory.
-///Is done in parallel if `parallel` is set to true.
-fn write_to_detector(detector: &mut [u8], value: u8, parallel: bool) {
-    if parallel {
-        detector
-            .par_iter_mut()
-            .for_each(|n| unsafe { write_volatile(n, value) });
-    } else {
-        detector
-            .iter_mut()
-            .for_each(|n| unsafe { write_volatile(n, value) });
-    }
-}
-
-///Checks if every element of the detector memory is equal to the given value.
-///Is done in parallel if `parallel` is set to true.
-fn detector_equals(detector: &[u8], value: u8, parallel: bool) -> bool {
-    if parallel {
-        detector
-            .par_iter()
-            .all(|i| unsafe { read_volatile(i) == value })
-    } else {
-        detector
-            .iter()
-            .all(|i| unsafe { read_volatile(i) == value })
-    }
-}
-
-#[inline(always)]
-fn flush() {
-    stdout().flush().unwrap();
 }
