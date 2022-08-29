@@ -7,7 +7,7 @@ use rayon::prelude::*;
 pub struct Detector {
     parallel: bool,
     default: u8,
-    detector_volume: Vec<u8>,
+    detector_mass: Vec<u8>,
 }
 
 impl Detector {
@@ -15,7 +15,7 @@ impl Detector {
         Detector {
             parallel,
             default,
-            detector_volume: vec![default; capacity],
+            detector_mass: vec![default; capacity],
         }
     }
 
@@ -27,11 +27,11 @@ impl Detector {
     /// Writes the given value to every element of the detector memory.
     pub fn write(&mut self, value: u8) {
         if self.parallel {
-            self.detector_volume
+            self.detector_mass
                 .par_iter_mut()
                 .for_each(|n| unsafe { write_volatile(n, value) });
         } else {
-            self.detector_volume
+            self.detector_mass
                 .iter_mut()
                 .for_each(|n| unsafe { write_volatile(n, value) });
         }
@@ -40,11 +40,11 @@ impl Detector {
     /// If an element in the detector does not match its default value, return it's index.
     pub fn find_index_of_changed_element(&self) -> Option<usize> {
         if self.parallel {
-            self.detector_volume
+            self.detector_mass
                 .par_iter()
                 .position_any(|r| unsafe { read_volatile(r) != self.default })
         } else {
-            self.detector_volume
+            self.detector_mass
                 .iter()
                 .position(|r| unsafe { read_volatile(r) != self.default })
         }
@@ -57,8 +57,8 @@ impl Detector {
 
     /// Returns the value of the element at the given index, if it exists.
     pub fn get(&self, index: usize) -> Option<u8> {
-        if index < self.detector_volume.len() {
-            Some(unsafe { read_volatile(&self.detector_volume[index]) })
+        if index < self.detector_mass.len() {
+            Some(unsafe { read_volatile(&self.detector_mass[index]) })
         } else {
             None
         }
