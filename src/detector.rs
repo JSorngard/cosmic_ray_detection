@@ -21,15 +21,7 @@ impl Detector {
 
     /// Checks if every element of the detector memory is equal to the default value.
     pub fn is_intact(&self) -> bool {
-        if self.parallel {
-            self.detector_volume
-                .par_iter()
-                .all(|i| unsafe { read_volatile(i) == self.default })
-        } else {
-            self.detector_volume
-                .iter()
-                .all(|i| unsafe { read_volatile(i) == self.default })
-        }
+        !self.find_index_of_changed_element().is_some()
     }
 
     /// Writes the given value to every element of the detector memory.
