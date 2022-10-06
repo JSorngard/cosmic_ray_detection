@@ -8,15 +8,12 @@ use clap::Parser;
 mod config;
 mod detector;
 
-use crate::{
-    config::{parse_size_string, Args},
-    detector::Detector,
-};
+use crate::{config::Args, detector::Detector};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let conf: Args = Args::parse();
 
-    let size: usize = parse_size_string(conf.memory_to_occupy)?;
+    let size: usize = conf.memory_to_occupy.get();
     let verbose: bool = conf.verbose;
     let parallel: bool = conf.parallel;
     let check_delay: u64 = conf.delay_between_checks;

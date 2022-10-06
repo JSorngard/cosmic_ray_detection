@@ -1,53 +1,52 @@
 use clap::Parser;
-use std::error::Error;
-use std::fmt;
+use std::num::NonZeroUsize;
+use std::num::ParseIntError;
 
-const MEMORY_DEFAULT: &str = "1GB";
+const MEMORY_DEFAULT: usize = 8000000000;
 const DELAY_DEFAULT: u64 = 30000;
 
 ///Monitors memory for bit-flips (won't work on ECC memory).
 ///The chance of detection scales with the physical size of your DRAM modules
 ///and the percentage of them you allocate to this program.
 #[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
+#[command(author, version, about, long_about = None)]
 pub struct Args {
-    #[clap(short, value_parser,  default_value_t = MEMORY_DEFAULT.to_owned(), help = "The size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3Mb")]
-    pub memory_to_occupy: String,
+    #[arg(short,value_parser(parse_size_string), default_value_t = NonZeroUsize::new(MEMORY_DEFAULT).unwrap())]
+    ///The size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3Mb
+    pub memory_to_occupy: NonZeroUsize,
 
-    #[clap(short, value_parser, default_value_t = DELAY_DEFAULT, help = "An optional delay in between each integrity check (in milliseconds)")]
+    #[arg(short, default_value_t = DELAY_DEFAULT)]
+    ///An optional delay in between each integrity check (in milliseconds)
     pub delay_between_checks: u64,
 
-    #[clap(
-        long,
-        help = "Whether to run the integrity check in parallel to speed it up"
-    )]
+    #[arg(long)]
+    ///Whether to run the integrity check in parallel to speed it up
     pub parallel: bool,
 
-    #[clap(short, long, help = "Whether to print extra information")]
+    #[arg(short, long)]
+    ///Whether to print extra information"
     pub verbose: bool,
 }
 
 ///Parses a string describing a number of bytes into an integer.
 ///The string can use common SI prefixes as well, like '4GB' or '30kB'.
-pub fn parse_size_string(size_string: String) -> Result<usize, Box<dyn Error>> {
-    match size_string.parse::<usize>() {
+pub fn parse_size_string(size_string: &str) -> Result<NonZeroUsize, String> {
+    match size_string.parse::<NonZeroUsize>() {
         Ok(t) => Ok(t),
         Err(_) => {
             let chars: Vec<char> = size_string.chars().collect();
             let len: usize = chars.len();
             let last: char = match chars.last() {
                 Some(l) => *l,
-                None => {
-                    return Err(Box::new(MemoryStringError::new(
-                        "memory_to_occupy was empty".to_owned(),
-                    )))
-                }
+                None => return Err("memory_to_occupy was empty".into()),
             };
 
+            if last == '0' {
+                return Err("must occupy a nonzero amount of memory".into());
+            }
+
             if (last != 'B' && last != 'b') || len < 2 {
-                return Err(Box::new(MemoryStringError::new(
-                    "memory_to_occupy was incorrectly formatted".to_owned(),
-                )));
+                return Err("memory_to_occupy was incorrectly formatted".into());
             }
 
             let next_to_last: char = chars[len - 2];
@@ -65,13 +64,9 @@ pub fn parse_size_string(size_string: String) -> Result<usize, Box<dyn Error>> {
                 //HOW?!
                 1e15
             } else if !next_to_last.is_ascii_digit() {
-                return Err(Box::new(MemoryStringError::new(
-                    "unsupported memory size".to_owned(),
-                )));
+                return Err("unsupported memory size".into());
             } else {
-                return Err(Box::new(MemoryStringError::new(
-                    "could not parse memory size".to_owned(),
-                )));
+                return Err("could not parse memory size".into());
             };
 
             let bit_size: f64 = if last == 'B' { 1.0 } else { 1.0 / 8.0 };
@@ -79,28 +74,9 @@ pub fn parse_size_string(size_string: String) -> Result<usize, Box<dyn Error>> {
             let factor: usize = (si_prefix_factor * bit_size) as usize;
 
             let digits: String = chars[..len - 2].iter().collect();
-            let number: usize = digits.parse()?;
+            let number: usize = digits.parse().map_err(|e: ParseIntError| e.to_string())?;
 
-            Ok(number * factor)
+            NonZeroUsize::new(number * factor).ok_or_else(|| "zero is not a valid value".into())
         }
-    }
-}
-
-#[derive(Debug, Clone)]
-struct MemoryStringError {
-    message: String,
-}
-
-impl Error for MemoryStringError {}
-
-impl MemoryStringError {
-    fn new(message: String) -> Self {
-        MemoryStringError { message }
-    }
-}
-
-impl fmt::Display for MemoryStringError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.message)
     }
 }
