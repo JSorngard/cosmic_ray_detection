@@ -21,7 +21,7 @@ impl Detector {
 
     /// Checks if every element of the detector memory is equal to the default value.
     pub fn is_intact(&self) -> bool {
-        !self.find_index_of_changed_element().is_some()
+        self.find_index_of_changed_element().is_none()
     }
 
     /// Writes the given value to every element of the detector memory.
