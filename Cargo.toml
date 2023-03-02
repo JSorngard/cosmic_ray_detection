@@ -8,4 +8,4 @@ authors = ["Johanna Sörngård (jsorngard@gmail.com)"]
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
-rayon = "1.5"
+rayon = "1.6"
