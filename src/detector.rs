@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::ptr::{read_volatile, write_volatile};
 
 use rayon::prelude::*;
@@ -11,11 +12,66 @@ pub struct Detector {
 }
 
 impl Detector {
-    pub fn new(parallel: bool, default: u8, capacity: usize) -> Self {
+    pub fn new(parallel: bool, default: u8, capacity_bytes: usize) -> Self {
         Detector {
             parallel,
             default,
-            detector_mass: vec![default; capacity],
+            detector_mass: vec![default; capacity_bytes],
+        }
+    }
+
+    /// Allocates more and more memory until is is not possible to do so anymore.
+    /// Also fills that memory with the current value, or the default of there was no memory reserved.
+    pub fn maximize_mass(&mut self) {
+        const GIGA: usize = 1_000_000_000;
+
+        if self.detector_mass.capacity() == 0 {
+            // If you are using this program you probably have one kilobyte of memory.
+            self.change_mass(1_000);
+        }
+
+        // Double capacity until it is no longer possible
+        while self
+            .detector_mass
+            .try_reserve(self.detector_mass.capacity() * 2)
+            .is_ok()
+        {
+            self.change_mass(self.detector_mass.capacity())
+        }
+
+        // Increment capacity by one gigabyte until it is no longer possible
+        while self
+            .detector_mass
+            .try_reserve(self.detector_mass.capacity() + GIGA)
+            .is_ok()
+        {
+            self.change_mass(self.detector_mass.capacity())
+        }
+    }
+
+    /// Change the size of the detector.
+    /// Also writes the current detector value to the new memory.
+    pub fn change_mass(&mut self, new_capacity_bytes: usize) {
+        match new_capacity_bytes.cmp(&self.detector_mass.capacity()) {
+            Ordering::Greater => {
+                let current_value = self.get(0).unwrap_or(self.default);
+
+                // We do not know if this write is optimized away,
+                // regardless of the value here.
+                self.detector_mass.resize(new_capacity_bytes, 0);
+
+                // So we guard against lazy memory paging here using the
+                // volatile write functions.
+                if current_value == 0 {
+                    self.write(42);
+                }
+                self.write(current_value);
+            }
+            Ordering::Less => {
+                self.detector_mass.truncate(new_capacity_bytes);
+                self.detector_mass.shrink_to_fit();
+            }
+            Ordering::Equal => (),
         }
     }
 

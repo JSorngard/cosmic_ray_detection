@@ -13,7 +13,6 @@ use crate::{config::Args, detector::Detector};
 fn main() -> Result<(), Box<dyn Error>> {
     let conf: Args = Args::parse();
 
-    let size: usize = conf.memory_to_occupy.get();
     let verbose: bool = conf.verbose;
     let parallel: bool = conf.parallel;
     let check_delay: u64 = conf.delay_between_checks;
@@ -22,7 +21,13 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     if verbose {
         println!("\n------------ Runtime settings ------------");
-        println!("Using {} bits of RAM as detector", 8 * size);
+        println!(
+            "Using {} as detector",
+            match conf.memory_to_occupy {
+                Some(s) => format!("{} bits", s.get()),
+                None => "as many bits as I can get".to_string(),
+            }
+        );
 
         if check_delay == 0 {
             println!("Will do continuous integrity checks");
@@ -40,7 +45,13 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     //Instead of building a detector out of scintillators and photo multiplier tubes,
     //we just allocate some memory on this here computer.
-    let mut detector = Detector::new(parallel, 0, size);
+    let mut detector = if let Some(s) = conf.memory_to_occupy {
+        Detector::new(parallel, 0, s.get())
+    } else {
+        let mut d = Detector::new(parallel, 0, 0);
+        d.maximize_mass();
+        d
+    };
     //Less exciting, much less accurate and sensitive, but much cheaper
 
     //Avoid the pitfalls of virtual memory by writing nonzero values to the allocated memory.

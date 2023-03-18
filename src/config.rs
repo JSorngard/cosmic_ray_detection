@@ -2,7 +2,6 @@ use clap::Parser;
 use std::num::NonZeroUsize;
 use std::num::ParseIntError;
 
-const MEMORY_DEFAULT: usize = 8000000000;
 const DELAY_DEFAULT: u64 = 30000;
 
 ///Monitors memory for bit-flips (won't work on ECC memory).
@@ -11,9 +10,11 @@ const DELAY_DEFAULT: u64 = 30000;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 pub struct Args {
-    #[arg(short,value_parser(parse_size_string), default_value_t = NonZeroUsize::new(MEMORY_DEFAULT).unwrap())]
-    ///The size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3Mb
-    pub memory_to_occupy: NonZeroUsize,
+    #[arg(short, value_parser(parse_size_string))]
+    /// The size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3Mb.
+    /// If this argument is not provided the program will dynamically try to allocate as much as it can
+    /// (expect it to be able to allocate roughly half of your memory).
+    pub memory_to_occupy: Option<NonZeroUsize>,
 
     #[arg(short, default_value_t = DELAY_DEFAULT)]
     ///An optional delay in between each integrity check (in milliseconds)
