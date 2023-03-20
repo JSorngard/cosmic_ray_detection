@@ -49,7 +49,7 @@ pub fn parse_size_string(size_string: &str) -> Result<NonZeroUsize, String> {
             let (number, suffix) = size_string.split_at(
                 size_string
                     .chars()
-                    .position(|c| !c.is_ascii_digit())
+                    .position(|c| !c.is_ascii_digit() && c != '.')
                     .expect("in this match arm there should be some non-digit in the string"),
             );
 
