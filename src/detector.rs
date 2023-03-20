@@ -70,6 +70,11 @@ impl Detector {
 
     /// Resets the detector to its default value.
     pub fn reset(&mut self) {
+        if self.default == 0 {
+            // If some memory pages have been moved to swap due to inactivity
+            // just writing zero to them might not prompt the OS to give them back.
+            std::hint::black_box(self.write(42));
+        }
         self.write(self.default);
     }
 
