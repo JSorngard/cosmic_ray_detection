@@ -8,23 +8,23 @@ use clap::Parser;
 mod config;
 mod detector;
 
-use crate::{config::Args, detector::Detector};
+use crate::{config::Cli, detector::Detector};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let conf: Args = Args::parse();
+    let conf = Cli::parse();
 
     let verbose: bool = conf.verbose;
     let parallel: bool = conf.parallel;
     let check_delay: u64 = conf.delay_between_checks;
 
-    let sleep_duration: Duration = Duration::from_millis(check_delay);
+    let sleep_duration: Duration = Duration::from_secs(check_delay);
 
     if verbose {
         println!("\n------------ Runtime settings ------------");
         println!(
             "Using {} as detector",
             match conf.memory_to_occupy {
-                Some(s) => format!("{} bits", s.get()),
+                Some(s) => format!("{} bits", 8 * s.get()),
                 None => "as many bits as possible".to_string(),
             }
         );

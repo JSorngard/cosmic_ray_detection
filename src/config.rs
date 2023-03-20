@@ -1,35 +1,44 @@
-use clap::Parser;
+use clap::{ArgGroup, Parser};
 use std::num::NonZeroUsize;
 use std::num::ParseIntError;
 
 const DELAY_DEFAULT: u64 = 30000;
 
-///Monitors memory for bit-flips (won't work on ECC memory).
-///The chance of detection scales with the physical size of your DRAM modules
-///and the percentage of them you allocate to this program.
+/// Monitors memory for bit-flips (won't work on ECC memory).
+/// The chance of detection scales with the physical size of your DRAM modules
+/// and the percentage of them you allocate to this program.
 #[derive(Parser, Debug)]
-#[command(author, version, about, long_about = None)]
-pub struct Args {
+#[clap(author, version, about, long_about = None)]
+#[clap(group(
+    ArgGroup::new("detector memory size")
+        .required(true)
+        .args(&["memory_to_occupy", "maximize_memory"])
+))]
+pub struct Cli {
     #[arg(short, value_parser(parse_size_string))]
     /// The size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3Mb.
-    /// If this argument is not provided the program will dynamically try to allocate as much as it can.
+    /// If no suffix is given the program will assume that the number is the number of bits *not bytes* to monitor.
     pub memory_to_occupy: Option<NonZeroUsize>,
 
+    #[arg(long)]
+    /// Allocate as much memory as possible to the detector.
+    pub maximize_memory: bool,
+
     #[arg(short, default_value_t = DELAY_DEFAULT)]
-    ///An optional delay in between each integrity check (in milliseconds)
+    /// An optional delay in between each integrity check (in seconds).
     pub delay_between_checks: u64,
 
     #[arg(long)]
-    ///Whether to run the integrity check in parallel to speed it up
+    /// Whether to run the integrity check in parallel to speed it up.
     pub parallel: bool,
 
     #[arg(short, long)]
-    ///Whether to print extra information"
+    /// Whether to print extra information".
     pub verbose: bool,
 }
 
-///Parses a string describing a number of bytes into an integer.
-///The string can use common SI prefixes as well, like '4GB' or '30kB'.
+/// Parses a string describing a number of bytes into an integer.
+/// The string can use common SI prefixes as well, like '4GB' or '30kB'.
 pub fn parse_size_string(size_string: &str) -> Result<NonZeroUsize, String> {
     match size_string.parse::<NonZeroUsize>() {
         Ok(t) => Ok(t),
