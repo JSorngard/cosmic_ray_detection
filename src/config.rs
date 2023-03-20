@@ -102,7 +102,7 @@ fn parse_delay_string(s: &str) -> Result<Duration, String> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use super::parse_size_string;
 
     #[test]
     fn check_memory_parsing() {
