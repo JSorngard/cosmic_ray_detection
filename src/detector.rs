@@ -1,7 +1,7 @@
-use std::cmp::Ordering;
 use std::ptr::{read_volatile, write_volatile};
 
 use rayon::prelude::*;
+use sysinfo::{RefreshKind, System, SystemExt};
 
 /// In order to prevent the optimizer from removing the reads of the memory that make up the detector
 /// this struct will only use volatile reads and writes to its memory.
@@ -20,59 +20,21 @@ impl Detector {
         }
     }
 
-    /// Allocates more and more memory until is is not possible to do so anymore.
-    /// Also fills that memory with the current value, or the default if there was no memory reserved.
-    pub fn maximize_mass(&mut self) {
-        const GIGA: usize = 1_000_000_000;
-
-        if self.detector_mass.capacity() == 0 {
-            // If you are using this program you probably have one kilobyte of memory.
-            self.change_mass(1_000);
-        }
-
-        // Double capacity until it is no longer possible
-        while self
-            .detector_mass
-            .try_reserve(self.detector_mass.capacity() * 2)
-            .is_ok()
-        {
-            self.change_mass(self.detector_mass.capacity())
-        }
-
-        // Increment capacity by one gigabyte until it is no longer possible
-        while self
-            .detector_mass
-            .try_reserve(self.detector_mass.capacity() + GIGA)
-            .is_ok()
-        {
-            self.change_mass(self.detector_mass.capacity())
+    /// Creates a new detector that fills up as much memory as possible.
+    pub fn new_with_maximum_size(parallel: bool, default: u8) -> Self {
+        let s = System::new_with_specifics(RefreshKind::new().with_memory());
+        let capacity_bytes = usize::try_from(s.available_memory())
+            .expect("number of bytes of available memory fits in a usize");
+        Detector {
+            parallel,
+            default,
+            detector_mass: vec![default; capacity_bytes],
         }
     }
 
-    /// Change the size of the detector.
-    /// Also writes the current detector value to the new memory.
-    pub fn change_mass(&mut self, new_capacity_bytes: usize) {
-        match new_capacity_bytes.cmp(&self.detector_mass.capacity()) {
-            Ordering::Greater => {
-                let current_value = self.get(0).unwrap_or(self.default);
-
-                // We do not know if this write is optimized away,
-                // regardless of the value here.
-                self.detector_mass.resize(new_capacity_bytes, 0);
-
-                // So we guard against lazy memory paging here using the
-                // volatile write functions.
-                if current_value == 0 {
-                    self.write(42);
-                }
-                self.write(current_value);
-            }
-            Ordering::Less => {
-                self.detector_mass.truncate(new_capacity_bytes);
-                self.detector_mass.shrink_to_fit();
-            }
-            Ordering::Equal => (),
-        }
+    /// Returns the allocated memory size of the detector in bytes.
+    pub fn capacity(&self) -> usize {
+        self.detector_mass.capacity()
     }
 
     /// Checks if every element of the detector memory is equal to the default value.

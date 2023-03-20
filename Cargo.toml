@@ -1,6 +1,6 @@
 [package]
 name = "cosmic_ray_detection"
-version = "1.1.1"
+version = "2.0.0"
 edition = "2021"
 authors = ["Johanna Sörngård (jsorngard@gmail.com)"]
 
@@ -9,3 +9,4 @@ authors = ["Johanna Sörngård (jsorngard@gmail.com)"]
 [dependencies]
 clap = { version = "4.1", features = ["derive"] }
 rayon = "1.6"
+sysinfo = "0.28.3"

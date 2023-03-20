@@ -25,7 +25,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             "Using {} as detector",
             match conf.memory_to_occupy {
                 Some(s) => format!("{} bits", s.get()),
-                None => "as many bits as I can get".to_string(),
+                None => "as many bits as possible".to_string(),
             }
         );
 
@@ -43,22 +43,22 @@ fn main() -> Result<(), Box<dyn Error>> {
         stdout().flush()?;
     }
 
-    //Instead of building a detector out of scintillators and photo multiplier tubes,
-    //we just allocate some memory on this here computer.
-    let mut detector = if let Some(s) = conf.memory_to_occupy {
-        Detector::new(parallel, 0, s.get())
-    } else {
-        let mut d = Detector::new(parallel, 0, 0);
-        d.maximize_mass();
-        d
+    // Instead of building a detector out of scintillators and photo multiplier tubes,
+    // we just allocate some memory on this here computer.
+    let mut detector = match conf.memory_to_occupy {
+        Some(s) => Detector::new(parallel, 0, s.get()),
+        None => Detector::new_with_maximum_size(parallel, 0),
     };
-    //Less exciting, much less accurate and sensitive, but much cheaper
+    // Less exciting, much less accurate and sensitive, but much cheaper
 
-    //Avoid the pitfalls of virtual memory by writing nonzero values to the allocated memory.
+    // Avoid the pitfalls of virtual memory by writing nonzero values to the allocated memory.
     detector.write(42);
 
     if verbose {
-        println!("done");
+        print!(" done");
+        if conf.memory_to_occupy.is_none() {
+            print!(" with allocation of {} bytes", detector.capacity());
+        }
         println!("\nBeginning detection loop");
     }
 
@@ -66,7 +66,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut everything_is_fine: bool;
     let start: Instant = Instant::now();
     loop {
-        //Reset detector!
+        // Reset detector!
         if verbose {
             print!("Zeroing detector memory... ");
             stdout().flush()?;
@@ -74,7 +74,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         detector.reset();
         everything_is_fine = true;
 
-        //Some feedback for the user that the program is still running
+        // Some feedback for the user that the program is still running
         if verbose {
             println!("done");
             print!("Waiting for first check");
@@ -82,9 +82,9 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
 
         while everything_is_fine {
-            //We're not gonna miss any events by being too slow
+            // We're not gonna miss any events by being too slow
             sleep(sleep_duration);
-            //Check if all the bytes are still zero
+            // Check if all the bytes are still zero
             everything_is_fine = detector.is_intact();
             if verbose {
                 print!("\rIntegrity checks passed: {}", checks);
@@ -103,8 +103,9 @@ fn main() -> Result<(), Box<dyn Error>> {
             Some(index) => println!(
                 "Bit flip in byte at index {}, it became {}",
                 index,
-                //unwrap() is okay since we already found the index of the value in the detector earlier.
-                detector.get(index).unwrap(),
+                detector
+                    .get(index)
+                    .expect("already found the index of the value in the detector earlier"),
             ),
             None => println!(
                 "The same bit flipped back before we could find which one it was! Incredible!"

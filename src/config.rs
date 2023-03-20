@@ -12,8 +12,7 @@ const DELAY_DEFAULT: u64 = 30000;
 pub struct Args {
     #[arg(short, value_parser(parse_size_string))]
     /// The size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3Mb.
-    /// If this argument is not provided the program will dynamically try to allocate as much as it can
-    /// (expect it to be able to allocate roughly half of your memory).
+    /// If this argument is not provided the program will dynamically try to allocate as much as it can.
     pub memory_to_occupy: Option<NonZeroUsize>,
 
     #[arg(short, default_value_t = DELAY_DEFAULT)]
