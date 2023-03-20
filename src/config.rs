@@ -2,8 +2,6 @@ use clap::{ArgGroup, Parser};
 use std::num::NonZeroUsize;
 use std::time::Duration;
 
-use humantime;
-
 const DEFAULT_DELAY: &str = "30s";
 
 /// Monitors memory for bit-flips (won't work on ECC memory).
