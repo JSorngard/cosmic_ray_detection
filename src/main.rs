@@ -1,9 +1,10 @@
 use std::error::Error;
 use std::io::{stdout, Write};
 use std::thread::sleep;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 use clap::Parser;
+use humantime::format_duration;
 
 mod config;
 mod detector;
@@ -15,25 +16,23 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let verbose: bool = conf.verbose;
     let parallel: bool = conf.parallel;
-    let check_delay: u64 = conf.delay_between_checks;
-
-    let sleep_duration: Duration = Duration::from_secs(check_delay);
+    let sleep_duration = conf.delay_between_checks;
 
     if verbose {
         println!("\n------------ Runtime settings ------------");
         println!(
             "Using {} as detector",
             match conf.memory_to_occupy {
-                Some(s) => format!("{} bits", 8 * s.get()),
-                None => "as many bits as possible".to_string(),
+                Some(s) => format!("{} bytes", s.get()),
+                None => "as many bytes as possible".to_string(),
             }
         );
 
-        if check_delay == 0 {
-            println!("Will do continuous integrity checks");
-        } else {
-            println!("Waiting {:?} between integrity checks", sleep_duration);
-        }
+        println!(
+            "Waiting {} between integrity checks",
+            format_duration(sleep_duration)
+        );
+
         if parallel {
             println!("Checking memory integrity in parallel");
         }
