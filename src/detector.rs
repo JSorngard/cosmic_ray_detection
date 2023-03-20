@@ -21,7 +21,7 @@ impl Detector {
     }
 
     /// Allocates more and more memory until is is not possible to do so anymore.
-    /// Also fills that memory with the current value, or the default of there was no memory reserved.
+    /// Also fills that memory with the current value, or the default if there was no memory reserved.
     pub fn maximize_mass(&mut self) {
         const GIGA: usize = 1_000_000_000;
 
