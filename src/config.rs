@@ -31,18 +31,18 @@ pub struct Cli {
     pub delay_between_checks: Duration,
 
     #[arg(long)]
-    /// Whether to run the integrity check in parallel to speed it up.
+    /// Run the integrity check in parallel.
     pub parallel: bool,
 
     #[arg(short, long)]
-    /// Whether to print extra information".
+    /// Print extra information.
     pub verbose: bool,
 }
 
 /// Parses a string describing a number of bytes into an integer.
 /// The string can use common SI prefixes as well, like '4GB' or '30kB'.
 pub fn parse_size_string(size_string: &str) -> Result<NonZeroUsize, String> {
-    match size_string.parse::<usize>() {
+    match size_string.parse() {
         // The input was a number, interpret it as the number of bytes if nonzero.
         Ok(t) => NonZeroUsize::new(t).ok_or_else(|| "zero is not a valid value".into()),
         // The input was more than just a number
