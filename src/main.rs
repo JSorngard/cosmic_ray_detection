@@ -9,6 +9,8 @@ use humantime::format_duration;
 mod config;
 mod detector;
 
+#[cfg(not(windows))]
+use crate::config::MaximizeMemoryMode;
 use crate::{config::Cli, detector::Detector};
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -22,9 +24,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         println!("\n------------ Runtime settings ------------");
         println!(
             "Using {} as detector",
-            match conf.memory_to_occupy {
+            match conf.memory_to_monitor {
                 Some(s) => format!("{} bytes", s.get()),
-                None => "as many bytes as possible".to_string(),
+                #[cfg(not(windows))]
+                None => match conf.use_all.expect("this only happens if -m wasn't specified, and either -m or --use-all must be specified at the CLI level") {
+                    MaximizeMemoryMode::Available => "as much memory as possible",
+                    MaximizeMemoryMode::Free => "all unused memory",
+                }
+                .to_owned(),
+                #[cfg(windows)]
+                None => "as much memory as possible".to_owned(),
             }
         );
 
@@ -44,9 +53,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Instead of building a detector out of scintillators and photo multiplier tubes,
     // we just allocate some memory on this here computer.
-    let mut detector = match conf.memory_to_occupy {
+    let mut detector = match conf.memory_to_monitor {
         Some(s) => Detector::new(parallel, 0, s.get()),
+        #[cfg(windows)]
         None => Detector::new_with_maximum_size(parallel, 0),
+        #[cfg(not(windows))]
+        None => Detector::new_with_maximum_size_in_mode(parallel, 0, conf.use_all.expect("this only happens if -m wasn't specified, and either -m or --use-all must be specified at the CLI level")),
     };
     // Less exciting, much less accurate and sensitive, but much cheaper
 
@@ -55,14 +67,14 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     if verbose {
         print!(" done");
-        if conf.memory_to_occupy.is_none() {
+        if conf.memory_to_monitor.is_none() {
             print!(" with allocation of {} bytes", detector.capacity());
         }
         println!("\nBeginning detection loop");
     }
 
     let mut checks: u64 = 1;
-    let mut everything_is_fine: bool;
+    let mut memory_is_intact: bool;
     let start: Instant = Instant::now();
     loop {
         // Reset detector!
@@ -71,7 +83,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             stdout().flush()?;
         }
         detector.reset();
-        everything_is_fine = true;
+        memory_is_intact = true;
 
         // Some feedback for the user that the program is still running
         if verbose {
@@ -80,11 +92,11 @@ fn main() -> Result<(), Box<dyn Error>> {
             stdout().flush()?;
         }
 
-        while everything_is_fine {
+        while memory_is_intact {
             // We're not gonna miss any events by being too slow
             sleep(sleep_duration);
             // Check if all the bytes are still zero
-            everything_is_fine = detector.is_intact();
+            memory_is_intact = detector.is_intact();
             if verbose {
                 print!("\rIntegrity checks passed: {}", checks);
                 stdout().flush()?;

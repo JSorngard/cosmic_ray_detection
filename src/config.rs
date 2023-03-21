@@ -1,8 +1,14 @@
-use clap::{ArgGroup, Parser};
+use clap::{ArgGroup, Parser, ValueEnum};
 use std::num::NonZeroUsize;
 use std::time::Duration;
 
 const DEFAULT_DELAY: &str = "30s";
+
+#[derive(Debug, Clone, Copy, ValueEnum)]
+pub enum MaximizeMemoryMode {
+    Available,
+    Free,
+}
 
 /// Monitors memory for bit-flips (won't work on ECC memory).
 /// The chance of detection scales with the physical size of your DRAM modules
@@ -12,17 +18,30 @@ const DEFAULT_DELAY: &str = "30s";
 #[clap(group(
     ArgGroup::new("detector memory size")
         .required(true)
-        .args(&["memory_to_occupy", "maximize_memory"])
+        .args(&["memory_to_monitor", "use_all"])
 ))]
 pub struct Cli {
-    #[arg(short, value_parser(parse_size_string))]
+    #[arg(short, long, value_parser(parse_size_string))]
     /// The size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3MB.
     /// If no suffix is given the program will assume that the given number is the number of bytes to monitor.
-    pub memory_to_occupy: Option<NonZeroUsize>,
+    pub memory_to_monitor: Option<NonZeroUsize>,
 
+    // On linux there is a difference between free and available memory,
+    // and so this option lets the user specify what they mean.
+    #[cfg(not(windows))]
+    #[arg(long, value_enum, value_name = "MAXIMIZATION_MODE")]
+    /// Allocate as much memory as possible to the detector.
+    /// If "free" is specified the program will allocate all currently unused memory,
+    /// while if "available" is specified the program will also try to eject things that sit in memory
+    /// but haven't been used in a while.
+    pub use_all: Option<MaximizeMemoryMode>,
+
+    // On windows there is no difference between free and available memory
+    // so we just allocate as much as windows gives us.
+    #[cfg(windows)]
     #[arg(long)]
     /// Allocate as much memory as possible to the detector.
-    pub maximize_memory: bool,
+    pub use_all: bool,
 
     #[arg(short, value_parser = parse_delay_string, default_value = DEFAULT_DELAY)]
     /// The delay in between each integrity check.

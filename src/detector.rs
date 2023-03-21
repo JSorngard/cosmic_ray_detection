@@ -1,6 +1,11 @@
 use std::ptr::{read_volatile, write_volatile};
 
-use rayon::prelude::*;
+#[cfg(not(windows))]
+use crate::config::MaximizeMemoryMode;
+
+use rayon::prelude::{
+    IndexedParallelIterator, IntoParallelRefIterator, IntoParallelRefMutIterator, ParallelIterator,
+};
 use sysinfo::{RefreshKind, System, SystemExt};
 
 /// In order to prevent the optimizer from removing the reads of the memory that make up the detector
@@ -20,11 +25,32 @@ impl Detector {
         }
     }
 
+    #[cfg(windows)]
     /// Creates a new detector that fills up as much memory as possible.
     pub fn new_with_maximum_size(parallel: bool, default: u8) -> Self {
         let s = System::new_with_specifics(RefreshKind::new().with_memory());
         let capacity_bytes = usize::try_from(s.available_memory())
             .expect("number of bytes of available memory fits in a usize");
+        Detector {
+            parallel,
+            default,
+            detector_mass: vec![default; capacity_bytes],
+        }
+    }
+
+    #[cfg(not(windows))]
+    /// Creates a new detector that fills up as much memory as possible in the specified way.
+    pub fn new_with_maximum_size_in_mode(
+        parallel: bool,
+        default: u8,
+        mode: MaximizeMemoryMode,
+    ) -> Self {
+        let s = System::new_with_specifics(RefreshKind::new().with_memory());
+        let capacity_bytes = usize::try_from(match mode {
+            MaximizeMemoryMode::Available => s.available_memory(),
+            MaximizeMemoryMode::Free => s.free_memory(),
+        })
+        .expect("number of bytes of available memory fits in a usize");
         Detector {
             parallel,
             default,
