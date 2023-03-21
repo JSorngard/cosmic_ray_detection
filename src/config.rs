@@ -29,7 +29,7 @@ pub struct Cli {
     // On linux there is a difference between free and available memory,
     // and so this option lets the user specify what they mean.
     #[cfg(not(windows))]
-    #[arg(long, value_enum, value_name = "MAXIMIZATION_MODE")]
+    #[arg(long, value_enum, value_name = "ALLOCATION_MODE")]
     /// Allocate as much memory as possible to the detector.
     /// If "free" is specified the program will allocate all currently unused memory,
     /// while if "available" is specified the program will also try to eject things that sit in memory
