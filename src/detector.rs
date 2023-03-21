@@ -32,7 +32,7 @@ impl Detector {
         let s = System::new_with_specifics(RefreshKind::new().with_memory());
         let capacity_bytes = usize::try_from(s.available_memory())
             .expect("number of bytes of available memory fits in a usize");
-        
+
         Detector {
             parallel,
             default,
@@ -42,12 +42,14 @@ impl Detector {
 
     #[cfg(not(windows))]
     /// Creates a new detector that fills up as much memory as possible in the specified way.
+    /// # Panic
+    /// Panics if this function is called on an operating system that is not supported by [sysinfo](https://crates.io/crates/sysinfo).
     pub fn new_with_maximum_size_in_mode(
         parallel: bool,
         default: u8,
         mode: MaximizeMemoryMode,
     ) -> Self {
-        if !<sysinfo::System as SystemExt>::IS_SUPPORTED {
+        if !<System as SystemExt>::IS_SUPPORTED {
             panic!("the current OS is not supported by the mechanism this program uses to determine available memory, please specify it manually");
         }
 
@@ -57,7 +59,7 @@ impl Detector {
             MaximizeMemoryMode::Free => s.free_memory(),
         })
         .expect("number of bytes of available memory fits in a usize");
-        
+
         Detector {
             parallel,
             default,
