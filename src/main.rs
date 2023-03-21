@@ -98,7 +98,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             checks
         );
 
-        match detector.find_index_of_changed_element() {
+        match detector.position_of_changed_element() {
             Some(index) => println!(
                 "Bit flip in byte at index {}, it became {}",
                 index,

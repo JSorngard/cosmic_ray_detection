@@ -39,7 +39,7 @@ impl Detector {
 
     /// Checks if every element of the detector memory is equal to the default value.
     pub fn is_intact(&self) -> bool {
-        self.find_index_of_changed_element().is_none()
+        self.position_of_changed_element().is_none()
     }
 
     /// Writes the given value to every element of the detector memory.
@@ -56,7 +56,7 @@ impl Detector {
     }
 
     /// If an element in the detector does not match its default value, return it's index.
-    pub fn find_index_of_changed_element(&self) -> Option<usize> {
+    pub fn position_of_changed_element(&self) -> Option<usize> {
         if self.parallel {
             self.detector_mass
                 .par_iter()
