@@ -28,9 +28,11 @@ impl Detector {
     #[cfg(windows)]
     /// Creates a new detector that fills up as much memory as possible.
     pub fn new_with_maximum_size(parallel: bool, default: u8) -> Self {
+        // Know this is supported on windows.
         let s = System::new_with_specifics(RefreshKind::new().with_memory());
         let capacity_bytes = usize::try_from(s.available_memory())
             .expect("number of bytes of available memory fits in a usize");
+        
         Detector {
             parallel,
             default,
@@ -45,12 +47,17 @@ impl Detector {
         default: u8,
         mode: MaximizeMemoryMode,
     ) -> Self {
+        if !<sysinfo::System as SystemExt>::IS_SUPPORTED {
+            panic!("the current OS is not supported by the mechanism this program uses to determine available memory, please specify it manually");
+        }
+
         let s = System::new_with_specifics(RefreshKind::new().with_memory());
         let capacity_bytes = usize::try_from(match mode {
             MaximizeMemoryMode::Available => s.available_memory(),
             MaximizeMemoryMode::Free => s.free_memory(),
         })
         .expect("number of bytes of available memory fits in a usize");
+        
         Detector {
             parallel,
             default,
