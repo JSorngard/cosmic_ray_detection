@@ -29,9 +29,10 @@ pub struct Cli {
     /// If no suffix is given the program will assume that the given number is the number of bytes to monitor.
     pub memory_to_monitor: Option<NonZeroUsize>,
 
-    // On linux there is a difference between free and available memory,
-    // and so this option lets the user specify what they mean.
-    #[cfg(not(windows))]
+    // There is a difference between free and available memory,
+    // and on most operating systems we can detect this difference.
+    // This option lets the user specify which alternative they mean.
+    #[cfg(all(not(windows), not(freebsd)))]
     #[arg(long, value_enum, value_name = "ALLOCATION_MODE")]
     /// Allocate as much memory as possible to the detector.
     /// If "free" is specified the program will allocate all currently unused memory,
@@ -39,9 +40,9 @@ pub struct Cli {
     /// but haven't been used in a while.
     pub use_all: Option<AllocationMode>,
 
-    // On windows there is no difference between free and available memory
-    // so we just allocate as much as windows gives us.
-    #[cfg(windows)]
+    // On Windows and FreeBSD there is no way to differentiate free and available memory,
+    // so we just allocate as much as the OS gives us.
+    #[cfg(any(windows, freebsd))]
     #[arg(long)]
     /// Allocate as much memory as possible to the detector.
     pub use_all: bool,

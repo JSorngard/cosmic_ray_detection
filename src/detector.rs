@@ -1,6 +1,6 @@
 use std::ptr::{read_volatile, write_volatile};
 
-#[cfg(not(windows))]
+#[cfg(all(not(windows), not(freebsd)))]
 use crate::config::AllocationMode;
 
 use rayon::prelude::{
@@ -25,7 +25,7 @@ impl Detector {
         }
     }
 
-    #[cfg(windows)]
+    #[cfg(any(windows, freebsd))]
     /// Creates a new detector that fills up as much memory as possible.
     pub fn new_with_maximum_size(parallel: bool, default: u8) -> Self {
         // Know this is supported on windows.
@@ -40,7 +40,7 @@ impl Detector {
         }
     }
 
-    #[cfg(not(windows))]
+    #[cfg(all(not(windows), not(freebsd)))]
     /// Creates a new detector that fills up as much memory as possible in the specified way.
     /// # Panic
     /// Panics if this function is called on an operating system that is not supported by [sysinfo](https://crates.io/crates/sysinfo).
