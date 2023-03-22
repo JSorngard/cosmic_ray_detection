@@ -50,7 +50,7 @@ impl Detector {
         mode: AllocationMode,
     ) -> Self {
         if !<System as SystemExt>::IS_SUPPORTED {
-            panic!("the current OS is not supported by the mechanism this program uses to determine available memory, please specify it manually");
+            panic!("ERROR: {} is not supported by the mechanism this program uses to determine available memory, please specify it manually", std::env::consts::OS);
         }
 
         let s = System::new_with_specifics(RefreshKind::new().with_memory());
