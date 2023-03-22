@@ -5,7 +5,7 @@ use std::time::Duration;
 const DEFAULT_DELAY: &str = "30s";
 
 #[derive(Debug, Clone, Copy, ValueEnum)]
-pub enum MaximizeMemoryMode {
+pub enum AllocationMode {
     Available,
     Free,
 }
@@ -34,7 +34,7 @@ pub struct Cli {
     /// If "free" is specified the program will allocate all currently unused memory,
     /// while if "available" is specified the program will also try to eject things that sit in memory
     /// but haven't been used in a while.
-    pub use_all: Option<MaximizeMemoryMode>,
+    pub use_all: Option<AllocationMode>,
 
     // On windows there is no difference between free and available memory
     // so we just allocate as much as windows gives us.

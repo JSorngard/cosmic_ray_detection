@@ -1,7 +1,7 @@
 use std::ptr::{read_volatile, write_volatile};
 
 #[cfg(not(windows))]
-use crate::config::MaximizeMemoryMode;
+use crate::config::AllocationMode;
 
 use rayon::prelude::{
     IndexedParallelIterator, IntoParallelRefIterator, IntoParallelRefMutIterator, ParallelIterator,
@@ -47,7 +47,7 @@ impl Detector {
     pub fn new_with_maximum_size_in_mode(
         parallel: bool,
         default: u8,
-        mode: MaximizeMemoryMode,
+        mode: AllocationMode,
     ) -> Self {
         if !<System as SystemExt>::IS_SUPPORTED {
             panic!("the current OS is not supported by the mechanism this program uses to determine available memory, please specify it manually");
@@ -55,8 +55,8 @@ impl Detector {
 
         let s = System::new_with_specifics(RefreshKind::new().with_memory());
         let capacity_bytes = usize::try_from(match mode {
-            MaximizeMemoryMode::Available => s.available_memory(),
-            MaximizeMemoryMode::Free => s.free_memory(),
+            AllocationMode::Available => s.available_memory(),
+            AllocationMode::Free => s.free_memory(),
         })
         .expect("number of bytes of available memory fits in a usize");
 

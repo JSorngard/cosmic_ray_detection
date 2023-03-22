@@ -10,7 +10,7 @@ mod config;
 mod detector;
 
 #[cfg(not(windows))]
-use crate::config::MaximizeMemoryMode;
+use crate::config::AllocationMode;
 use crate::{config::Cli, detector::Detector};
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -28,8 +28,8 @@ fn main() -> Result<(), Box<dyn Error>> {
                 Some(s) => format!("{} bytes", s.get()),
                 #[cfg(not(windows))]
                 None => match conf.use_all.expect("this only happens if -m wasn't specified, and either -m or --use-all must be specified at the CLI level") {
-                    MaximizeMemoryMode::Available => "as much memory as possible",
-                    MaximizeMemoryMode::Free => "all unused memory",
+                    AllocationMode::Available => "as much memory as possible",
+                    AllocationMode::Free => "all unused memory",
                 }
                 .to_owned(),
                 #[cfg(windows)]
