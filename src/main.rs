@@ -9,7 +9,7 @@ use humantime::format_duration;
 mod config;
 mod detector;
 
-#[cfg(all(not(windows), not(freebsd)))]
+#[cfg(all(not(target_os = "windows"), not(target_os = "freebsd")))]
 use crate::config::AllocationMode;
 use crate::{config::Cli, detector::Detector};
 
@@ -26,13 +26,13 @@ fn main() -> Result<(), Box<dyn Error>> {
             "Using {} as detector",
             match conf.memory_to_monitor {
                 Some(s) => format!("{} bytes", s.get()),
-                #[cfg(all(not(windows), not(freebsd)))]
+                #[cfg(all(not(target_os = "windows"), not(target_os = "freebsd")))]
                 None => match conf.use_all.expect("this only happens if -m wasn't specified, and either -m or --use-all must be specified at the CLI level") {
                     AllocationMode::Available => "as much memory as possible",
                     AllocationMode::Free => "all unused memory",
                 }
                 .to_owned(),
-                #[cfg(any(windows, freebsd))]
+                #[cfg(any(target_os = "windows", target_os = "freebsd"))]
                 None => "as much memory as possible".to_owned(),
             }
         );
@@ -55,9 +55,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     // we just allocate some memory on this here computer.
     let mut detector = match conf.memory_to_monitor {
         Some(s) => Detector::new(parallel, 0, s.get()),
-        #[cfg(any(windows, freebsd))]
+        #[cfg(any(target_os = "windows", target_os = "freebsd"))]
         None => Detector::new_with_maximum_size(parallel, 0),
-        #[cfg(all(not(windows), not(freebsd)))]
+        #[cfg(all(not(target_os = "windows"), not(target_os = "freebsd")))]
         None => Detector::new_with_maximum_size_in_mode(parallel, 0, conf.use_all.expect("this only happens if -m wasn't specified, and either -m or --use-all must be specified at the CLI level")),
     };
     // Less exciting, much less accurate and sensitive, but much cheaper
