@@ -1,9 +1,12 @@
-use clap::{ArgGroup, Parser, ValueEnum};
+#[cfg(not(windows))]
+use clap::ValueEnum;
+use clap::{ArgGroup, Parser};
 use std::num::NonZeroUsize;
 use std::time::Duration;
 
 const DEFAULT_DELAY: &str = "30s";
 
+#[cfg(not(windows))]
 #[derive(Debug, Clone, Copy, ValueEnum)]
 pub enum AllocationMode {
     Available,
