@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let verbose: bool = conf.verbose;
     let parallel: bool = conf.parallel;
-    let sleep_duration = conf.delay_between_checks;
+    let sleep_duration = conf.delay;
 
     if verbose {
         println!("\n------------ Runtime settings ------------");

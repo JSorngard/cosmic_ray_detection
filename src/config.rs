@@ -24,7 +24,7 @@ pub enum AllocationMode {
         .args(&["memory_to_monitor", "use_all"])
 ))]
 pub struct Cli {
-    #[arg(short, long, value_parser(parse_size_string))]
+    #[arg(short, long, value_parser(parse_memory_string))]
     /// The size of the memory to monitor for bit flips, understands e.g. 200, 5kB, 2GB and 3Mb.
     /// If no suffix is given the program will assume that the given number is the number of bytes to monitor.
     pub memory_to_monitor: Option<NonZeroUsize>,
@@ -49,7 +49,7 @@ pub struct Cli {
 
     #[arg(short, value_parser = parse_delay_string, default_value = DEFAULT_DELAY)]
     /// The delay in between each integrity check.
-    pub delay_between_checks: Duration,
+    pub delay: Duration,
 
     #[arg(long)]
     /// Run the integrity check in parallel.
@@ -62,7 +62,7 @@ pub struct Cli {
 
 /// Parses a string describing a number of bytes into an integer.
 /// The string can use common SI prefixes as well, like '4GB' or '30kB'.
-pub fn parse_size_string(size_string: &str) -> Result<NonZeroUsize, String> {
+pub fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, String> {
     match size_string.parse() {
         // The input was a number, interpret it as the number of bytes if nonzero.
         Ok(t) => NonZeroUsize::new(t).ok_or_else(|| "zero is not a valid value".to_owned()),
