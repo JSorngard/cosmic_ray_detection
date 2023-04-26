@@ -155,25 +155,25 @@ mod test {
     #[test]
     fn check_memory_parsing() {
         for s in (0..10).map(|i| 2_usize.pow(i)) {
-            assert_eq!(parse_size_string(&format!("{s}")).unwrap().get(), s);
+            assert_eq!(parse_memory_string(&format!("{s}")).unwrap().get(), s);
             assert_eq!(
-                parse_size_string(&format!("{s}kB")).unwrap().get(),
+                parse_memory_string(&format!("{s}kB")).unwrap().get(),
                 s * 1000
             );
             assert_eq!(
-                parse_size_string(&format!("{s}MB")).unwrap().get(),
+                parse_memory_string(&format!("{s}MB")).unwrap().get(),
                 s * 1000000
             );
             assert_eq!(
-                parse_size_string(&format!("{s}GB")).unwrap().get(),
+                parse_memory_string(&format!("{s}GB")).unwrap().get(),
                 s * 1000000000
             );
             assert_eq!(
-                parse_size_string(&format!("{s}TB")).unwrap().get(),
+                parse_memory_string(&format!("{s}TB")).unwrap().get(),
                 s * 1000000000000
             );
             assert_eq!(
-                parse_size_string(&format!("{s}PB")).unwrap().get(),
+                parse_memory_string(&format!("{s}PB")).unwrap().get(),
                 s * 1000000000000000
             );
         }

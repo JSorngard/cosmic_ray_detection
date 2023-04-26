@@ -97,7 +97,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             sleep(sleep_duration);
             // Check if all the bytes are still zero
             memory_is_intact = detector.is_intact();
-            if verbose {
+            if verbose && memory_is_intact {
                 print!("\rIntegrity checks passed: {}", checks);
                 stdout().flush()?;
             }
