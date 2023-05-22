@@ -11,13 +11,13 @@ mod detector;
 
 #[cfg(all(not(target_os = "windows"), not(target_os = "freebsd")))]
 use crate::config::AllocationMode;
+
 use crate::{config::Cli, detector::Detector};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let conf = Cli::parse();
 
     let verbose: bool = conf.verbose;
-    let parallel: bool = conf.parallel;
     let sleep_duration = conf.delay;
 
     if verbose {
@@ -42,28 +42,22 @@ fn main() -> Result<(), Box<dyn Error>> {
             format_duration(sleep_duration)
         );
 
-        if parallel {
-            println!("Checking memory integrity in parallel");
-        }
         println!("------------------------------------------\n");
 
         print!("Allocating detector memory...");
         stdout().flush()?;
     }
 
-    // Instead of building a detector out of scintillators and photo multiplier tubes,
+    // Instead of building a detector out of scintillators and photo-multiplier tubes,
     // we just allocate some memory on this here computer.
     let mut detector = match conf.memory_to_monitor {
-        Some(s) => Detector::new(parallel, 0, s.get()),
+        Some(s) => Detector::new(0, s.get()),
         #[cfg(any(target_os = "windows", target_os = "freebsd"))]
-        None => Detector::new_with_maximum_size(parallel, 0),
+        None => Detector::new_with_maximum_size(0),
         #[cfg(all(not(target_os = "windows"), not(target_os = "freebsd")))]
-        None => Detector::new_with_maximum_size_in_mode(parallel, 0, conf.use_all.expect("this only happens if -m wasn't specified, and either -m or --use-all must be specified at the CLI level")),
+        None => Detector::new_with_maximum_size_in_mode(0, conf.use_all.expect("this only happens if -m wasn't specified, and either -m or --use-all must be specified at the CLI level")),
     };
     // Less exciting, much less accurate and sensitive, but much cheaper
-
-    // Avoid the pitfalls of virtual memory by writing nonzero values to the allocated memory.
-    detector.write(42);
 
     if verbose {
         print!(" done");

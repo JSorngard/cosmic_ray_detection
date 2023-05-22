@@ -9,5 +9,8 @@ authors = ["Johanna Sörngård (jsorngard@gmail.com)"]
 [dependencies]
 clap = { version = "4.1", features = ["derive"] }
 humantime = "2.1.0"
-rayon = "1.6"
-sysinfo = "0.28.3"
+rayon = {version = "1.6", optional = true}
+sysinfo = {version = "0.28.3", default_features = false}
+
+[features]
+rayon = ["dep:rayon", "sysinfo/multithread"]

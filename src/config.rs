@@ -51,10 +51,6 @@ pub struct Cli {
     /// The delay in between each integrity check.
     pub delay: Duration,
 
-    #[arg(long)]
-    /// Run the integrity check in parallel.
-    pub parallel: bool,
-
     #[arg(short, long)]
     /// Print extra information.
     pub verbose: bool,
