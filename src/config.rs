@@ -85,21 +85,25 @@ pub fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, String> {
             let mut chars = suffix.chars().rev();
 
             if let Some(ending) = chars.next() {
-                if ending == 'B' {
-                    if let Some(si_prefix) = chars.next() {
-                        num_bytes *= parse_si_prefix(si_prefix)?;
-                    }
-                } else if ending == 'b' {
-                    let si_prefix = chars.next().ok_or_else(|| {
-                        "if the suffix ends with 'b' it must be two characters long".to_owned()
-                    })?;
+				match ending {
+					'B' => {
+						if let Some(si_prefix) = chars.next() {
+							num_bytes *= parse_si_prefix(si_prefix)?;
+						}
+					},
+					'b' => {
+						let si_prefix = chars.next().ok_or_else(|| {
+							"if the suffix ends with 'b' it must be two characters long".to_owned()
+						})?;
 
-                    num_bytes *= parse_si_prefix(si_prefix)? / 8.0;
-                } else {
-                    return Err(format!(
-                        "the suffix must end with either 'B' or 'b', not '{ending}'"
-                    ));
-                }
+						num_bytes *= parse_si_prefix(si_prefix)? / 8.0;
+					},
+					_ => {
+						return Err(format!(
+							"the suffix must end with either 'B' or 'b', not '{ending}'"
+						));
+					}
+				}
             }
 
             NonZeroUsize::new(num_bytes as usize)
@@ -109,26 +113,18 @@ pub fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, String> {
 }
 
 fn parse_si_prefix(c: char) -> Result<f64, String> {
-    if c == 'k' {
-        Ok(1e3)
-    } else if c == 'M' {
-        Ok(1e6)
-    } else if c == 'G' {
-        Ok(1e9)
-    } else if c == 'T' {
-        Ok(1e12)
-    } else if c == 'P' {
-        // Values higher than this one should not be needed, but are included for completeness.
-        Ok(1e15)
-    } else if c == 'E' {
-        Ok(1e18)
-    } else if c == 'Z' {
-        Ok(1e21)
-    } else if c == 'Y' {
-        Ok(1e24)
-    } else {
-        Err(format!("'{c}' is not a supported SI prefix"))
-    }
+	match c {
+		'k' => Ok(1e3),
+		'M' => Ok(1e6),
+		'G' => Ok(1e9),
+		'T' => Ok(1e12),
+		// Values higher than this one should not be needed, but are included for completeness.
+		'P' => Ok(1e15),
+		'E' => Ok(1e18),
+		'Z' => Ok(1e21),
+		'Y' => Ok(1e24),
+		_ => Err(format!("'{c}' is not a supported SI prefix"))
+	}
 }
 
 fn parse_delay_string(s: &str) -> Result<Duration, String> {
