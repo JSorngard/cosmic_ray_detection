@@ -1,6 +1,6 @@
 [package]
 name = "cosmic_ray_detection"
-version = "4.0.0"
+version = "5.0.0"
 edition = "2021"
 authors = ["Johanna Sörngård (jsorngard@gmail.com)"]
 
