@@ -4,8 +4,6 @@ version = "4.0.0"
 edition = "2021"
 authors = ["Johanna Sörngård (jsorngard@gmail.com)"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 clap = { version = "4.1", features = ["derive"] }
 humantime = "2.1.0"
@@ -13,4 +11,5 @@ rayon = {version = "1.6", optional = true}
 sysinfo = {version = "0.28.3", default_features = false}
 
 [features]
+# Enable this feature to run all memory reads and writes in parallel.
 rayon = ["dep:rayon", "sysinfo/multithread"]
