@@ -8,7 +8,7 @@ authors = ["Johanna Sörngård (jsorngard@gmail.com)"]
 clap = { version = "4.1", features = ["derive"] }
 humantime = "2.1.0"
 rayon = {version = "1.6", optional = true}
-sysinfo = {version = "0.28.3", default_features = false}
+sysinfo = {version = "0.29", default_features = false}
 
 [features]
 # Enable this feature to run all memory reads and writes in parallel.
