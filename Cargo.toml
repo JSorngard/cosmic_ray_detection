@@ -5,9 +5,9 @@ edition = "2021"
 authors = ["Johanna Sörngård (jsorngard@gmail.com)"]
 
 [dependencies]
-clap = { version = "4.1", features = ["derive"] }
+clap = { version = "4.4", features = ["derive"] }
 humantime = "2.1.0"
-rayon = {version = "1.6", optional = true}
+rayon = {version = "1.7", optional = true}
 sysinfo = {version = "0.29", default_features = false}
 
 [features]
