@@ -59,56 +59,56 @@ pub struct Cli {
 /// Parses a string describing a number of bytes into an integer.
 /// The string can use common SI prefixes as well, like '4GB' or '30kB'.
 pub fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, String> {
-    match size_string.parse() {
+    if let Ok(t) = size_string.parse() {
         // The input was a number, interpret it as the number of bytes if nonzero.
-        Ok(t) => NonZeroUsize::new(t).ok_or_else(|| "zero is not a valid value".to_owned()),
+        NonZeroUsize::new(t).ok_or_else(|| "zero is not a valid value".to_owned())
+    } else {
         // The input was more than just an integer
-        Err(_) => {
-            // We begin by splitting the string into the number and the suffix.
-            let (number, suffix) = match size_string
-                .chars()
-                .position(|c| !c.is_ascii_digit() && c != '.')
-            {
-                Some(index) => Ok(size_string.split_at(index)),
-                None => Err("you need to specify a suffix to use non-integer numbers".to_owned()),
-            }?;
 
-            // Parse the number part
-            let mut num_bytes: f64 = number
-                .parse()
-                .map_err(|_| format!("could not interpret '{number}' as a number"))?;
+        // We begin by splitting the string into the number and the suffix.
+        let (number, suffix) = match size_string
+            .chars()
+            .position(|c| !c.is_ascii_digit() && c != '.')
+        {
+            Some(index) => Ok(size_string.split_at(index)),
+            None => Err("you need to specify a suffix to use non-integer numbers".to_owned()),
+        }?;
 
-            if suffix.len() > 2 {
-                return Err("the suffix can be at most two letters long".to_owned());
-            }
+        // Parse the number part
+        let mut num_bytes: f64 = number
+            .parse()
+            .map_err(|_| format!("could not interpret '{number}' as a number"))?;
 
-            let mut chars = suffix.chars().rev();
+        if suffix.len() > 2 {
+            return Err("the suffix can be at most two letters long".to_owned());
+        }
 
-            if let Some(ending) = chars.next() {
-                match ending {
-                    'B' => {
-                        if let Some(si_prefix) = chars.next() {
-                            num_bytes *= parse_si_prefix(si_prefix)?;
-                        }
-                    }
-                    'b' => {
-                        let si_prefix = chars.next().ok_or_else(|| {
-                            "if the suffix ends with 'b' it must be two characters long".to_owned()
-                        })?;
+        let mut chars = suffix.chars().rev();
 
-                        num_bytes *= parse_si_prefix(si_prefix)? / 8.0;
-                    }
-                    _ => {
-                        return Err(format!(
-                            "the suffix must end with either 'B' or 'b', not '{ending}'"
-                        ));
+        if let Some(ending) = chars.next() {
+            match ending {
+                'B' => {
+                    if let Some(si_prefix) = chars.next() {
+                        num_bytes *= parse_si_prefix(si_prefix)?;
                     }
                 }
-            }
+                'b' => {
+                    let si_prefix = chars.next().ok_or_else(|| {
+                        "if the suffix ends with 'b' it must be two characters long".to_owned()
+                    })?;
 
-            NonZeroUsize::new(num_bytes as usize)
-                .ok_or_else(|| "the size must be at least one byte".to_owned())
+                    num_bytes *= parse_si_prefix(si_prefix)? / 8.0;
+                }
+                _ => {
+                    return Err(format!(
+                        "the suffix must end with either 'B' or 'b', not '{ending}'"
+                    ));
+                }
+            }
         }
+
+        NonZeroUsize::new(num_bytes as usize)
+            .ok_or_else(|| "the size must be at least one byte".to_owned())
     }
 }
 
