@@ -3,6 +3,7 @@ name = "cosmic_ray_detection"
 version = "5.0.0"
 edition = "2021"
 authors = ["Johanna Sörngård (jsorngard@gmail.com)"]
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 clap = { version = "4.4", features = ["derive"] }
