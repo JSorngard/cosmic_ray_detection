@@ -14,7 +14,7 @@ pub enum AllocationMode {
 }
 
 /// Monitors memory for bit-flips.
-/// Won't work on ECC memory, and may not work on DDR5 and later memory modules since they contain onboard ECC.
+/// Won't work on ECC memory, and may not work on DDR5 memory modules and later since they contain onboard ECC.
 /// The chance of detection scales with the physical size of your DRAM modules
 /// and the percentage of them you allocate to this program.
 #[derive(Parser, Debug)]
