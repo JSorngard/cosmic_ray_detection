@@ -9,6 +9,7 @@ The detection works by allocating a vector of zeroed bytes and then checking reg
  * Beware of operating systems being clever, and e.g. compressing unused memory pages or swapping them to disk. A vector of nothing but zeros that hasn't been used in a while is an excellent target for this. This will shrink your detector!
  * Expect detections to be *very* rare.
 
+It may also not work on DDR5 memory modules and later as those contain onboard ECC.
 
 **Special thanks to**
  * /u/csdt0 and /u/HeroicKatora on reddit for ideas about how to improve the correctness of the program and avoid the pitfalls of virtual memory.
