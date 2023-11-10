@@ -68,7 +68,13 @@ impl Detector {
 
     /// Checks if every element of the detector memory is equal to the default value.
     pub fn is_intact(&self) -> bool {
-        self.position_of_changed_element().is_none()
+        self.position_and_value_of_changed_element().is_none()
+    }
+
+    /// Returns the default value of the detector. This is what gets written to
+    /// every byte when [`reset`](Detector::reset) is called.
+    pub const fn default(&self) -> u8 {
+        self.default
     }
 
     /// Writes the given value to every element of the detector memory.
@@ -84,7 +90,7 @@ impl Detector {
             .for_each(|n| unsafe { write_volatile(n, value) });
     }
 
-    /// If an element in the detector does not match its default value, return it's index.
+    /// If an element in the detector does not match its default value, return its index.
     pub fn position_of_changed_element(&self) -> Option<usize> {
         #[cfg(feature = "rayon")]
         return self
@@ -96,6 +102,14 @@ impl Detector {
         self.detector_mass
             .iter()
             .position(|r| unsafe { read_volatile(r) != self.default })
+    }
+
+    /// If an element in the detector does not match its default value, return its index and value.
+    pub fn position_and_value_of_changed_element(&self) -> Option<(usize, u8)> {
+        match self.position_of_changed_element() {
+            Some(i) => self.get(i).map(|v| (i, v)),
+            None => None,
+        }
     }
 
     /// Resets the detector to its default value.

@@ -3,6 +3,7 @@ use std::io::{stdout, Write};
 use std::thread::sleep;
 use std::time::Instant;
 
+use chrono::Local;
 use clap::Parser;
 use humantime::format_duration;
 
@@ -92,25 +93,25 @@ fn main() -> Result<(), Box<dyn Error>> {
             // Check if all the bytes are still zero
             memory_is_intact = detector.is_intact();
             if verbose && memory_is_intact {
-                print!("\rIntegrity checks passed: {checks}");
+                print!(
+                    "\rPassed integrity check number {checks} at {}",
+                    Local::now()
+                );
                 stdout().flush()?;
             }
             checks += 1;
         }
 
         println!(
-            "\nDetected a bitflip after {:?} on integrity check number {}",
-            start.elapsed(),
-            checks
+            "\nDetected a bitflip after {} on integrity check number {checks} at {}",
+            humantime::Duration::from(start.elapsed()),
+            Local::now(),
         );
 
-        match detector.position_of_changed_element() {
-            Some(index) => println!(
-                "Bit flip in byte at index {}, it became {}",
-                index,
-                detector
-                    .get(index)
-                    .expect("already found the index of the value in the detector earlier"),
+        match detector.position_and_value_of_changed_element() {
+            Some((index, value)) => println!(
+                "The byte at index {index} flipped from {} to {value}",
+                detector.default(),
             ),
             None => println!(
                 "The same bit flipped back before we could find which one it was! Incredible!"
