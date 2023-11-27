@@ -1,3 +1,5 @@
+#[cfg(feature = "rayon")]
+use clap::crate_version;
 #[cfg(all(not(target_os = "windows"), not(target_os = "freebsd")))]
 use clap::ValueEnum;
 use clap::{ArgGroup, Parser};
@@ -13,12 +15,17 @@ pub enum AllocationMode {
     Free,
 }
 
+#[cfg(feature = "rayon")]
+const LONG_VERSION: &str = concat!(crate_version!(), "\nparallelization enabled");
+#[cfg(not(feature = "rayon"))]
+const LONG_VERSION: Option<&str> = None;
+
 /// Monitors memory for bit-flips.
 /// Won't work on ECC memory, and may not work on DDR5 memory modules and later since they contain onboard ECC.
 /// The chance of detection scales with the physical size of your DRAM modules
 /// and the percentage of them you allocate to this program.
 #[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
+#[clap(author, version, about, long_about = None, long_version = LONG_VERSION)]
 #[clap(group(
     ArgGroup::new("detector memory size")
         .required(true)
