@@ -18,4 +18,4 @@ lto = "fat"
 
 [features]
 # Enable this feature to run all memory reads and writes in parallel.
-rayon = ["dep:rayon", "sysinfo/multithread", "clap/cargo"]
+rayon = ["dep:rayon", "clap/cargo"]
