@@ -63,7 +63,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     if verbose {
         print!(" done");
         if conf.memory_to_monitor.is_none() {
-            print!(" with allocation of {} bytes", detector.capacity());
+            print!(" with allocation of {} bytes", detector.len());
         }
         println!("\nBeginning detection loop");
     }

@@ -14,14 +14,14 @@ use sysinfo::{RefreshKind, System, SystemExt};
 /// this struct will only use volatile reads and writes to its memory.
 pub struct Detector {
     default: u8,
-    detector_mass: Vec<u8>,
+    detector_mass: Box<[u8]>,
 }
 
 impl Detector {
     pub fn new(default: u8, capacity_bytes: usize) -> Self {
         Detector {
             default,
-            detector_mass: vec![default; capacity_bytes],
+            detector_mass: (0..capacity_bytes).map(|_| default).collect(),
         }
     }
 
@@ -34,7 +34,7 @@ impl Detector {
 
         Detector {
             default,
-            detector_mass: vec![default; capacity_bytes],
+            detector_mass: (0..capacity_bytes).map(|_| default).collect(),
         }
     }
 
@@ -51,17 +51,18 @@ impl Detector {
         let capacity_bytes = usize::try_from(match mode {
             AllocationMode::Available => s.available_memory(),
             AllocationMode::Free => s.free_memory(),
-        }).unwrap_or(usize::MAX);
+        })
+        .unwrap_or(usize::MAX);
 
         Detector {
             default,
-            detector_mass: vec![default; capacity_bytes],
+            detector_mass: (0..capacity_bytes).map(|_| default).collect(),
         }
     }
 
     /// Returns the allocated memory size of the detector in bytes.
-    pub fn capacity(&self) -> usize {
-        self.detector_mass.capacity()
+    pub fn len(&self) -> usize {
+        self.detector_mass.len()
     }
 
     /// Checks if every element of the detector memory is equal to the default value.
