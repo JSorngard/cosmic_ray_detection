@@ -66,7 +66,7 @@ pub struct Cli {
 
 /// Parses a string describing a number of bytes into an integer.
 /// The string can use common SI prefixes as well, like '4GB' or '30kB'.
-pub fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, String> {
+fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, String> {
     if let Ok(t) = size_string.parse() {
         // The input was a number, interpret it as the number of bytes if nonzero.
         NonZeroUsize::new(t).ok_or_else(|| "zero is not a valid value".to_owned())
