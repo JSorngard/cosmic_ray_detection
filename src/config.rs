@@ -114,7 +114,7 @@ fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, String> {
             }
         }
 
-        if num_bytes.floor() != num_bytes {
+        if num_bytes.fract() != 0.0 {
             return Err("the size must be an integer number of bytes".to_owned());
         }
 
