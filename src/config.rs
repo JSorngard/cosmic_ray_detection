@@ -41,7 +41,7 @@ pub struct Cli {
     // and on most operating systems we can detect this difference.
     // This option lets the user specify which alternative they mean.
     #[cfg(all(not(target_os = "windows"), not(target_os = "freebsd")))]
-    #[arg(long, value_enum, value_name = "ALLOCATION_MODE")]
+    #[arg(short = 'a', long, value_enum, value_name = "ALLOCATION_MODE")]
     /// Allocate as much memory as possible to the detector.
     /// If "free" is specified the program will allocate all currently unused memory,
     /// while if "available" is specified the program will also try to eject things that sit in memory
@@ -51,7 +51,7 @@ pub struct Cli {
     // On Windows and FreeBSD sysinfo has no way to differentiate free and available memory,
     // so we just allocate as much as the OS gives us.
     #[cfg(any(target_os = "windows", target_os = "freebsd"))]
-    #[arg(long)]
+    #[arg(short = 'a', long)]
     /// Allocate as much memory as possible to the detector.
     pub use_all: bool,
 
@@ -101,11 +101,10 @@ fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, String> {
                     }
                 }
                 'b' => {
-                    let si_prefix = chars.next().ok_or_else(|| {
-                        "if the suffix ends with 'b' it must be two characters long".to_owned()
-                    })?;
-
-                    num_bytes *= parse_si_prefix(si_prefix)? / 8.0;
+                    if let Some(si_prefix) = chars.next() {
+                        num_bytes *= parse_si_prefix(si_prefix)?;
+                    }
+                    num_bytes /= 8.0;
                 }
                 _ => {
                     return Err(format!(
@@ -113,6 +112,10 @@ fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, String> {
                     ));
                 }
             }
+        }
+
+        if num_bytes.floor() != num_bytes {
+            return Err("the size must be an integer number of bytes".to_owned())
         }
 
         NonZeroUsize::new(num_bytes as usize)
