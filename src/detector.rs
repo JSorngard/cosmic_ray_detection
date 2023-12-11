@@ -8,7 +8,7 @@ use rayon::prelude::{
     IndexedParallelIterator, IntoParallelRefIterator, IntoParallelRefMutIterator, ParallelIterator,
 };
 
-use sysinfo::{RefreshKind, System, SystemExt};
+use sysinfo::{MemoryRefreshKind, RefreshKind, System};
 
 /// In order to prevent the optimizer from removing the reads of the memory that make up the detector
 /// this struct will only use volatile reads and writes to its memory.
@@ -29,7 +29,9 @@ impl Detector {
     /// Creates a new detector that fills up as much memory as possible.
     pub fn new_with_maximum_size(default: u8) -> Self {
         // Know this is supported on windows.
-        let s = System::new_with_specifics(RefreshKind::new().with_memory());
+        let s = System::new_with_specifics(
+            RefreshKind::new().with_memory(MemoryRefreshKind::new().with_ram()),
+        );
         let capacity_bytes = usize::try_from(s.available_memory()).unwrap_or(usize::MAX);
 
         Detector {
@@ -43,11 +45,13 @@ impl Detector {
     /// # Panic
     /// Panics if this function is called on an operating system that is not supported by [sysinfo](https://crates.io/crates/sysinfo).
     pub fn new_with_maximum_size_in_mode(default: u8, mode: AllocationMode) -> Self {
-        if !<System as SystemExt>::IS_SUPPORTED {
+        if !sysinfo::IS_SUPPORTED_SYSTEM {
             panic!("{} is not supported by the mechanism this program uses to determine available memory, please specify it manually", std::env::consts::OS);
         }
 
-        let s = System::new_with_specifics(RefreshKind::new().with_memory());
+        let s = System::new_with_specifics(
+            RefreshKind::new().with_memory(MemoryRefreshKind::new().with_ram()),
+        );
         let capacity_bytes = usize::try_from(match mode {
             AllocationMode::Available => s.available_memory(),
             AllocationMode::Free => s.free_memory(),
