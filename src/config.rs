@@ -57,6 +57,7 @@ pub struct Cli {
 
     #[arg(short, value_parser = parse_delay_string, default_value = DEFAULT_DELAY)]
     /// The delay in between each integrity check.
+    /// If a bitflip occurs it will not be detected until the next integrity check.
     pub delay: Duration,
 
     #[arg(short, long)]
