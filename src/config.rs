@@ -63,6 +63,12 @@ pub struct Cli {
     #[arg(short, long)]
     /// Print extra information.
     pub verbose: bool,
+
+    #[cfg(feature = "rayon")]
+    #[arg(short, long)]
+    /// The number of parallel jobs to run when writing and reading the detector memory.
+    /// If this is not set the number of jobs will be set to the number of logical cores.
+    pub jobs: Option<NonZeroUsize>,
 }
 
 /// Parses a string describing a number of bytes into an integer.

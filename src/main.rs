@@ -49,6 +49,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         stdout().flush()?;
     }
 
+    #[cfg(feature = "rayon")]
+    if let Some(jobs) = conf.jobs {
+        rayon::ThreadPoolBuilder::new()
+            .num_threads(jobs.into())
+            .build_global()
+            .map_err(|e| Box::new(e))?;
+    }
+
     // Instead of building a detector out of scintillators and photo-multiplier tubes,
     // we just allocate some memory on this here computer.
     let mut detector = match conf.memory_to_monitor {
