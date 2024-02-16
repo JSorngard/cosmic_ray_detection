@@ -20,6 +20,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let verbose: bool = conf.verbose;
     let sleep_duration = conf.delay;
+    let cr = !conf.log_format;
 
     if verbose {
         println!("\n------------ Runtime settings ------------");
@@ -100,11 +101,14 @@ fn main() -> Result<(), Box<dyn Error>> {
             sleep(sleep_duration);
             // Check if all the bytes are still zero
             memory_is_intact = detector.is_intact();
-            if verbose && memory_is_intact {
-                print!(
-                    "\rPassed integrity check number {checks} at {}",
-                    Local::now()
-                );
+            if memory_is_intact {
+                if cr {
+                    print!("\r")
+                }
+                print!("Passed integrity check number {checks} at {}", Local::now());
+                if !cr {
+                    println!();
+                }
                 stdout().flush()?;
             }
             checks += 1;

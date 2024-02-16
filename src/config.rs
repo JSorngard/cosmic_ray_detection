@@ -64,6 +64,11 @@ pub struct Cli {
     /// Print extra information.
     pub verbose: bool,
 
+    #[arg(short, long)]
+    /// Don't print any carriage returns in the output.
+    /// This results in a better format for logging to a file.
+    pub log_format: bool,
+
     #[cfg(feature = "rayon")]
     #[arg(short, long)]
     /// The number of parallel jobs to run when writing and reading the detector memory.
