@@ -9,7 +9,7 @@ license = "MIT OR Apache-2.0"
 clap = { version = "4.4", features = ["derive"] }
 humantime = "2.1.0"
 chrono = "0.4"
-rayon = { version = "1.8", optional = true }
+rayon = { version = "1.9", optional = true }
 sysinfo = { version = "0.30", default_features = false }
 
 [profile.release-lto]
