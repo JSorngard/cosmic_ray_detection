@@ -16,6 +16,10 @@ sysinfo = { version = "0.30", default_features = false }
 inherits = "release"
 lto = "fat"
 
+[profile.dev.package."*"]
+# Enable optimization of dependencies also in debug mode
+opt-level=3
+
 [features]
 # Enable this feature to run all memory reads and writes in parallel.
 rayon = ["dep:rayon", "clap/cargo"]
