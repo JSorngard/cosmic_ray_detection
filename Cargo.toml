@@ -6,7 +6,7 @@ authors = ["Johanna Sörngård (jsorngard@gmail.com)"]
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-clap = { version = "4.4", features = ["derive"] }
+clap = { version = "4.5", features = ["derive"] }
 humantime = "2.1.0"
 chrono = "0.4"
 rayon = { version = "1.10", optional = true }
