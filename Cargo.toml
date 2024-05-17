@@ -15,6 +15,7 @@ sysinfo = { version = "0.30", default_features = false }
 [profile.release-lto]
 inherits = "release"
 lto = "fat"
+strip = "symbols"
 
 [profile.dev.package."*"]
 # Enable optimization of dependencies also in debug mode
