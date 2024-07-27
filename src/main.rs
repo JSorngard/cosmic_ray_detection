@@ -3,9 +3,9 @@ use std::io::{stdout, Write};
 use std::thread::sleep;
 use std::time::Instant;
 
-use chrono::Local;
 use clap::Parser;
 use humantime::format_duration;
+use jiff::Zoned;
 
 mod config;
 mod detector;
@@ -105,7 +105,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 if cr {
                     print!("\r")
                 }
-                print!("Passed integrity check number {checks} at {}", Local::now());
+                print!("Passed integrity check number {checks} at {}", Zoned::now());
                 if !cr {
                     println!();
                 }
@@ -117,7 +117,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         println!(
             "\nDetected a bitflip after {} on integrity check number {checks} at {}",
             humantime::Duration::from(start.elapsed()),
-            Local::now(),
+            Zoned::now(),
         );
 
         match detector.position_and_value_of_changed_element() {
