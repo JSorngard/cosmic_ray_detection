@@ -16,6 +16,7 @@ sysinfo = { version = "0.31", default-features = false, features = ["system"] }
 inherits = "release"
 lto = "fat"
 strip = "symbols"
+codegen-units = 1
 
 [profile.dev.package."*"]
 # Enable optimization of dependencies also in debug mode
