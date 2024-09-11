@@ -93,7 +93,11 @@ fn main() -> Result<(), Box<dyn Error>> {
         if verbose {
             println!("done");
             print!("Waiting for first check");
-            stdout().flush()?;
+            if conf.log_format {
+                println!();
+            } else {
+                stdout().flush()?;
+            }
         }
 
         while memory_is_intact {
