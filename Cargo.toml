@@ -10,7 +10,7 @@ clap = { version = "4.5", features = ["derive"] }
 humantime = "2.1.0"
 jiff = "0.1.1"
 rayon = { version = "1.10", optional = true }
-sysinfo = { version = "0.30", default-features = false }
+sysinfo = { version = "0.31", default-features = false, features = ["system"] }
 
 [profile.release-lto]
 inherits = "release"
