@@ -8,7 +8,7 @@ license = "MIT OR Apache-2.0"
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }
 humantime = "2.1.0"
-jiff = "0.1.1"
+jiff = "0.1.14"
 rayon = { version = "1.10", optional = true }
 sysinfo = { version = "0.32", default-features = false, features = ["system"] }
 
