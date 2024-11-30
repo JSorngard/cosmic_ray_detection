@@ -21,7 +21,7 @@ impl Detector {
     pub fn new(default: u8, capacity_bytes: usize) -> Self {
         Detector {
             default,
-            detector_mass: (0..capacity_bytes).map(|_| default).collect(),
+            detector_mass: core::iter::repeat_n(default, capacity_bytes).collect(),
         }
     }
 
