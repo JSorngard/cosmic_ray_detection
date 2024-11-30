@@ -63,7 +63,7 @@ impl Detector {
 
         Detector {
             default,
-            detector_mass: (0..capacity_bytes).map(|_| default).collect(),
+            detector_mass: repeat_n(default, capacity_bytes).collect(),
         }
     }
 

@@ -3,8 +3,7 @@ use clap::crate_version;
 #[cfg(all(not(target_os = "windows"), not(target_os = "freebsd")))]
 use clap::ValueEnum;
 use clap::{ArgGroup, Parser};
-use std::num::NonZeroUsize;
-use std::time::Duration;
+use core::{num::NonZeroUsize, time::Duration};
 
 const DEFAULT_DELAY: &str = "30s";
 

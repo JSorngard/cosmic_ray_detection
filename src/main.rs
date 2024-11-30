@@ -1,7 +1,9 @@
-use std::error::Error;
-use std::io::{stdout, Write};
-use std::thread::sleep;
-use std::time::Instant;
+use core::error::Error;
+use std::{
+    io::{stdout, Write},
+    thread::sleep,
+    time::Instant,
+};
 
 use clap::Parser;
 use humantime::format_duration;
