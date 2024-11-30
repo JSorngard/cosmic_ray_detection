@@ -21,7 +21,7 @@ codegen-units = 1
 
 [profile.dev.package."*"]
 # Enable optimization of dependencies also in debug mode
-opt-level=3
+opt-level = 3
 
 [features]
 # Enable this feature to run all memory reads and writes in parallel.
