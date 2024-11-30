@@ -4,6 +4,7 @@ version = "5.0.2"
 edition = "2021"
 authors = ["Johanna Sörngård <jsorngard@gmail.com>"]
 license = "MIT OR Apache-2.0"
+rust-version = "1.78.0"
 
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }
@@ -20,7 +21,7 @@ codegen-units = 1
 
 [profile.dev.package."*"]
 # Enable optimization of dependencies also in debug mode
-opt-level=3
+opt-level = 3
 
 [features]
 # Enable this feature to run all memory reads and writes in parallel.

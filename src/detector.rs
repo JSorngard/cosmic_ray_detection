@@ -1,7 +1,4 @@
-use core::{
-    iter::repeat_n,
-    ptr::{read_volatile, write_volatile},
-};
+use core::ptr::{read_volatile, write_volatile};
 
 #[cfg(all(not(target_os = "windows"), not(target_os = "freebsd")))]
 use crate::config::AllocationMode;
@@ -24,7 +21,7 @@ impl Detector {
     pub fn new(default: u8, capacity_bytes: usize) -> Self {
         Detector {
             default,
-            detector_mass: repeat_n(default, capacity_bytes).collect(),
+            detector_mass: (0..capacity_bytes).map(|_| default).collect(),
         }
     }
 
@@ -39,7 +36,7 @@ impl Detector {
 
         Detector {
             default,
-            detector_mass: repeat_n(default, capacity_bytes).collect(),
+            detector_mass: (0..capacity_bytes).map(|_| default).collect(),
         }
     }
 
@@ -63,7 +60,7 @@ impl Detector {
 
         Detector {
             default,
-            detector_mass: repeat_n(default, capacity_bytes).collect(),
+            detector_mass: (0..capacity_bytes).map(|_| default).collect(),
         }
     }
 
