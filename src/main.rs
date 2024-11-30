@@ -1,5 +1,5 @@
-use core::error::Error;
 use std::{
+    error::Error,
     io::{stdout, Write},
     thread::sleep,
     time::Instant,
