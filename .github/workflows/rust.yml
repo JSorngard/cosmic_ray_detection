@@ -17,12 +17,25 @@ jobs:
     - name: Check formatting
       run: cargo fmt --verbose --check
 
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
+    - name: Install
+      run: cargo install cargo-all-features
+    - name: Check
+      run: cargo check-all-features
+
   test:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Run tests
-      run: cargo test --verbose
+    - uses: dtolnay/rust-toolchain@stable
+    - name: Install
+      run: cargo install cargo-all-features
+    - name: Test
+      run: cargo test-all-features
       
   build:
     runs-on: ubuntu-latest
