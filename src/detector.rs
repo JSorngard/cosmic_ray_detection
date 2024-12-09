@@ -30,7 +30,7 @@ impl Detector {
     pub fn new_with_maximum_size(default: u8) -> Self {
         // Know this is supported on windows.
         let s = System::new_with_specifics(
-            RefreshKind::new().with_memory(MemoryRefreshKind::new().with_ram()),
+            RefreshKind::nothing().with_memory(MemoryRefreshKind::nothing().with_ram()),
         );
         let capacity_bytes = usize::try_from(s.available_memory()).unwrap_or(usize::MAX);
 
