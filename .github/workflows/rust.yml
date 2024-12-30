@@ -23,9 +23,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
-    - name: Install
-      run: cargo install cargo-all-features
-    - name: Check
+    - uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-all-features
+    - name: Check all feature combinations
       run: cargo check-all-features
 
   test:
@@ -33,9 +34,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
-    - name: Install
-      run: cargo install cargo-all-features
-    - name: Test
+    - uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-all-features
+    - name: Test all feature combinations
       run: cargo test-all-features
       
   build:
@@ -51,7 +53,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
-    - name: Install
-      run: cargo install cargo-msrv
-    - name: Verify
+    - uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-msrv
+    - name: Verify MSRV
       run: cargo msrv verify
