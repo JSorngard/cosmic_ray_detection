@@ -58,3 +58,14 @@ jobs:
         tool: cargo-msrv
     - name: Verify MSRV
       run: cargo msrv verify
+
+  beta_test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@beta
+    - uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-all-features 
+    - name: Test all feature combinations of the crate on the Rust beta branch
+      run: cargo test-all-features
