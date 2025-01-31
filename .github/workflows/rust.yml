@@ -45,8 +45,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
-    - name: Build
-      run: cargo build --verbose
+    - uses: taiki-e/install-action@v2
+      with:
+        tool: cargo-all-features
+    - name: Build all feature combinations
+      run: cargo build-all-features
 
   verify_msrv:
     runs-on: ubuntu-latest
