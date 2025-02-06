@@ -60,7 +60,7 @@ jobs:
       with:
         tool: cargo-msrv
     - name: Verify MSRV
-      run: cargo msrv verify
+      run: cargo msrv verify --all-features
 
   beta_test:
     runs-on: ubuntu-latest
