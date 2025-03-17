@@ -8,7 +8,7 @@ rust-version = "1.74.0"
 
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }
-humantime = "2.1.0"
+humantime = "2.2.0"
 jiff = "0.2"
 rayon = { version = "1.10", optional = true }
 sysinfo = { version = "0.33", default-features = false, features = ["system"] }
