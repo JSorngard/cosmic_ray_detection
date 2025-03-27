@@ -35,9 +35,14 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain: [stable, beta]
     steps:
     - uses: actions/checkout@v4
-    - uses: dtolnay/rust-toolchain@stable
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.toolchain }}
     - uses: taiki-e/install-action@v2
       with:
         tool: cargo-all-features
@@ -65,14 +70,3 @@ jobs:
         tool: cargo-msrv
     - name: Verify MSRV
       run: cargo msrv verify --all-features
-
-  beta_test:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: dtolnay/rust-toolchain@beta
-    - uses: taiki-e/install-action@v2
-      with:
-        tool: cargo-all-features 
-    - name: Test all feature combinations of the crate on the Rust beta branch
-      run: cargo test-all-features
