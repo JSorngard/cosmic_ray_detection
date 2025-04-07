@@ -14,7 +14,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  rustfmt:
+  format:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -35,14 +35,9 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        toolchain: [stable, beta]
     steps:
     - uses: actions/checkout@v4
-    - uses: dtolnay/rust-toolchain@master
-      with:
-        toolchain: ${{ matrix.toolchain }}
+    - uses: dtolnay/rust-toolchain@stable
     - uses: taiki-e/install-action@v2
       with:
         tool: cargo-all-features
@@ -50,10 +45,16 @@ jobs:
       run: cargo test-all-features
       
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        toolchain: [stable, beta]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
-    - uses: dtolnay/rust-toolchain@stable
+    - uses: dtolnay/rust-toolchain@master
+      with:
+        toolchain: ${{ matrix.toolchain }}
     - uses: taiki-e/install-action@v2
       with:
         tool: cargo-all-features
