@@ -33,6 +33,14 @@ jobs:
     - name: Check all feature combinations
       run: cargo check-all-features
 
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
+    - name: Clippy
+      run: cargo clippy -- -D warnings
+
   test:
     runs-on: ubuntu-latest
     steps:
