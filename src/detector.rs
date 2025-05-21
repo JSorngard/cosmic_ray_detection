@@ -1,3 +1,6 @@
+// Copyright 2025 Johanna Sörngård
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use core::ptr::{read_volatile, write_volatile};
 
 #[cfg(all(not(target_os = "windows"), not(target_os = "freebsd")))]
