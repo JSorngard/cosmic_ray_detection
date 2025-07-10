@@ -19,6 +19,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
+    - name: Cache
+      uses: Swatinem/rust-cache@v2.8.0
     - name: Check formatting
       run: cargo fmt --verbose --check
 
@@ -27,6 +29,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
+    - name: Cache
+      uses: Swatinem/rust-cache@v2.8.0
     - uses: taiki-e/install-action@v2
       with:
         tool: cargo-all-features
@@ -38,6 +42,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
+    - name: Cache
+      uses: Swatinem/rust-cache@v2.8.0
     - name: Clippy
       run: cargo clippy -- -D warnings
 
@@ -46,6 +52,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
+    - name: Cache
+      uses: Swatinem/rust-cache@v2.8.0
     - uses: taiki-e/install-action@v2
       with:
         tool: cargo-all-features
@@ -63,6 +71,8 @@ jobs:
     - uses: dtolnay/rust-toolchain@master
       with:
         toolchain: ${{ matrix.toolchain }}
+    - name: Cache
+      uses: Swatinem/rust-cache@v2.8.0
     - uses: taiki-e/install-action@v2
       with:
         tool: cargo-all-features
@@ -74,6 +84,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@stable
+    - name: Cache
+      uses: Swatinem/rust-cache@v2.8.0
     - uses: taiki-e/install-action@v2
       with:
         tool: cargo-msrv
