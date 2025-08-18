@@ -1,3 +1,5 @@
+# Cosmic Ray Detection with Rust
+
 **Your computer can double up as a cosmic ray detector. Yes, really!**
 
 [Cosmic rays](https://en.wikipedia.org/wiki/Cosmic_ray) hit your computer all the time. If they hit the RAM, this can [sometimes cause disturbances](https://en.wikipedia.org/wiki/Soft_error#Cosmic_rays_creating_energetic_neutrons_and_protons), like flipping a random bit in memory.
@@ -13,6 +15,10 @@ It may also not work on DDR5 memory modules and later as those contain onboard E
 
 **Special thanks to**
  * /u/csdt0 and /u/HeroicKatora on reddit for ideas about how to improve the correctness of the program and avoid the pitfalls of virtual memory.
+
+## MSRV
+
+While this project will always bump the minor version if it introduces a change that requires a more modern Rust compiler, it's dependencies may have different policies. To guarantee a stable MSRV you can compile with `--locked`.
 
 <br>
 
