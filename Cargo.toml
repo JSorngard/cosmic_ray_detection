@@ -1,16 +1,16 @@
 [package]
 name = "cosmic_ray_detection"
-version = "5.1.0"
+version = "5.2.0"
 edition = "2021"
 authors = ["Johanna Sörngård <jsorngard@gmail.com>"]
 license = "MIT OR Apache-2.0"
-rust-version = "1.75.0"
+rust-version = "1.80.0"
 
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }
 humantime = "2.2.0"
 jiff = "0.2"
-rayon = { version = "1.10", optional = true }
+rayon = { version = "1.11", optional = true }
 sysinfo = { version = "0.36", default-features = false, features = ["system"] }
 
 [profile.release-lto]
