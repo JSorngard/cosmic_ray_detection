@@ -1,6 +1,6 @@
 [package]
 name = "cosmic_ray_detection"
-version = "5.1.0"
+version = "5.2.0"
 edition = "2021"
 authors = ["Johanna Sörngård <jsorngard@gmail.com>"]
 license = "MIT OR Apache-2.0"
