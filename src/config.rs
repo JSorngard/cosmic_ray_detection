@@ -7,6 +7,7 @@ use clap::crate_version;
 use clap::ValueEnum;
 use clap::{ArgGroup, Parser};
 use core::{num::NonZeroUsize, time::Duration};
+use std::borrow::Cow;
 
 const DEFAULT_DELAY: &str = "30s";
 
@@ -80,10 +81,10 @@ pub struct Cli {
 
 /// Parses a string describing a number of bytes into an integer.
 /// The string can use common SI prefixes as well, like '4GB' or '30kB'.
-fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, String> {
+fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, Cow<'static, str>> {
     if let Ok(t) = size_string.parse() {
         // The input was a number, interpret it as the number of bytes if nonzero.
-        NonZeroUsize::new(t).ok_or_else(|| "zero is not a valid value".to_owned())
+        NonZeroUsize::new(t).ok_or(Cow::Borrowed("zero is not a valid value"))
     } else {
         // The input was more than just an integer
 
@@ -93,7 +94,9 @@ fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, String> {
             .position(|c| !c.is_ascii_digit() && c != '.')
         {
             Some(index) => Ok(size_string.split_at(index)),
-            None => Err("you need to specify a suffix to use non-integer numbers".to_owned()),
+            None => Err(Cow::Borrowed(
+                "you need to specify a suffix to use non-integer numbers",
+            )),
         }?;
 
         // Parse the number part
@@ -102,7 +105,7 @@ fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, String> {
             .map_err(|_| format!("could not interpret '{number}' as a number"))?;
 
         if suffix.len() > 2 {
-            return Err("the suffix can be at most two letters long".to_owned());
+            return Err(Cow::Borrowed("the suffix can be at most two letters long"));
         }
 
         let mut chars = suffix.chars().rev();
@@ -121,19 +124,19 @@ fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, String> {
                     num_bytes /= 8.0;
                 }
                 _ => {
-                    return Err(format!(
+                    return Err(Cow::Owned(format!(
                         "the suffix must end with either 'B' or 'b', not '{ending}'"
-                    ));
+                    )));
                 }
             }
         }
 
         if num_bytes.fract() != 0.0 {
-            return Err("the size must be an integer number of bytes".to_owned());
+            return Err(Cow::Borrowed("the size must be an integer number of bytes"));
         }
 
         NonZeroUsize::new(num_bytes as usize)
-            .ok_or_else(|| "the size must be at least one byte".to_owned())
+            .ok_or(Cow::Borrowed("the size must be at least one byte"))
     }
 }
 
