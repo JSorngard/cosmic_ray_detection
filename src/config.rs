@@ -84,7 +84,7 @@ pub struct Cli {
 fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, Cow<'static, str>> {
     if let Ok(t) = size_string.parse() {
         // The input was a number, interpret it as the number of bytes if nonzero.
-        NonZeroUsize::new(t).ok_or_else(|| Cow::Borrowed("zero is not a valid value"))
+        NonZeroUsize::new(t).ok_or(Cow::Borrowed("zero is not a valid value"))
     } else {
         // The input was more than just an integer
 
@@ -136,7 +136,7 @@ fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, Cow<'static, s
         }
 
         NonZeroUsize::new(num_bytes as usize)
-            .ok_or_else(|| Cow::Borrowed("the size must be at least one byte"))
+            .ok_or(Cow::Borrowed("the size must be at least one byte"))
     }
 }
 
