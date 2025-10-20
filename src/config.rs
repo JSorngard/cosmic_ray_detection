@@ -94,7 +94,9 @@ fn parse_memory_string(size_string: &str) -> Result<NonZeroUsize, Cow<'static, s
             .position(|c| !c.is_ascii_digit() && c != '.')
         {
             Some(index) => Ok(size_string.split_at(index)),
-            None => Err(Cow::Borrowed("you need to specify a suffix to use non-integer numbers")),
+            None => Err(Cow::Borrowed(
+                "you need to specify a suffix to use non-integer numbers",
+            )),
         }?;
 
         // Parse the number part
