@@ -1,4 +1,4 @@
-// Copyright 2025 Johanna Sörngård
+// Copyright 2022-2025 Johanna Sörngård
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use core::ptr::{read_volatile, write_volatile};
